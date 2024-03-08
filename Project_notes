@@ -1,0 +1,396 @@
+target
+
+    Where to display the linked URL, as the name for a browsing context (a tab, window, or <iframe>). The following keywords have special meanings for where to load the URL:
+
+        _self: the current browsing context. (Default) - it asks your permission to use the site
+
+        _blank: usually a new tab, but users can configure browsers to open a new window instead. - it opens a new tab
+
+        _parent: the parent browsing context of the current one. If no parent, behaves as _self.
+
+        _top: the topmost browsing context (the "highest" context that's an ancestor of the current one). If no ancestors, behaves as _self.
+                - it uses the same window
+
+
+---------------------------------
+
+
+
+
+
+// callback
+        // await step0_call_url_in_window_way1().then(function () {var returnedurl = window.location.href; document.getElementById("outData0").innerHTML = returnedurl;})
+
+        // promise, then callback
+        // await step0_call_url_in_window_way1().then(res => res).then(res => {setTimeout( function() { var returnedurl = window.location.href; document.getElementById("outData0").innerHTML = returnedurl; }, 3000)})
+        
+        // It waits to send the form
+        // await step0_call_url_in_window_way1()
+        // setTimeout( function() { var returnedurl = window.location.href; document.getElementById("outData0").innerHTML = returnedurl; }, 3000)
+
+
+---------------------------------
+// Different ways to make function calls in sequence
+
+// return a promise of function_name, and then return a callback of the promise - you always have an output from function_name (like undefined)
+// await function_name().then(response => response.json).then(response => { output res or other commands})
+
+// return a callback of function_name, and do a sequential function call
+// await function_name().then(response => (do something with response)).then(function() {do other commands without response})
+
+// return the output of function_name
+// await function_name().then(function(response) {output response or other commands})
+
+// call function_name and then run some other commands sequentially
+// await function_name().then(function() {other commands})
+
+// await function_name().then(() => {other commands})
+---------------------------------
+
+
+
+
+
+
+
+
+---------------------------------
+Version 0
+---------------------------------
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    
+    <!-- HTML -->
+
+    <!-- <button id="step0_call_url_in_window_way0" onclick="step0_call_url_in_window_way0()" style='text-align: left;'>step0_call_url_in_window_way0</button> -->
+
+    <!-- <button id="step0_call_url_in_window_way1" onclick="step0_call_url_in_window_way1()" style='text-align: left;'>step0_call_url_in_window_way1</button> -->
+
+    <button id="sequential_events" onclick="sequential_events()" style='text-align: left;'>sequential_events</button>
+
+    <br><br>
+
+    <textarea id="outData0" style='text-align: left;' rows="4" cols="50" placeholder="outData0"></textarea>
+
+    <br><br>
+
+    <textarea id="outData1" style='text-align: left;' rows="4" cols="50" placeholder="outData1"></textarea>
+
+    <br><br>
+
+    <button id="get_url_on_newpage" onclick="get_url_on_newpage()" style='text-align: left;'>get_url_on_newpage</button>
+
+    <br><br>
+
+    <textarea id="outData2" style='text-align: left;' rows="4" cols="50" placeholder="outData2"></textarea>
+
+    <br><br>
+
+    <button id="fetch_post2bigquery" onclick="fetch_post2bigquery()" style='text-align: left;'>fetch_post2bigquery</button>
+
+    <br><br>
+
+    <textarea id="outData3" style='text-align: left;' rows="4" cols="50" placeholder="outData3"></textarea>
+
+    <br><br>
+
+
+    <!-- JAVASCRIPT -->
+    <script>
+      
+      // -------------------
+      // Start monitoring events as soon as script starts
+      // -------------------
+      // it seems like it is always running, so I can just start it running at the start of script
+      // window.addEventListener("locationchange", function(){ document.getElementById("outData1").innerHTML = window.location.href; });
+
+      // -------------------
+
+      var SCOPES = 'https://www.googleapis.com/auth/bigquery https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloud-platform.read-only';
+
+      var CLIENT_ID = '982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com';
+
+      var REDIRECT_URI = 'https://script.google.com/macros/s/AKfycbxlPnt0dpuOhLOcydEJ0GdWSPD2BFf3W3BvMTLY6pJP/dev';
+      // OR
+      // var REDIRECT_URI = 'https://script.google.com';
+
+      var CLIENT_SECRET = "";  // for trading in the authorization_code for the access_token
+
+      // -------------------
+
+
+      function get_url_on_newpage(){
+        var fragmentString = location.hash.substring(1);
+        document.getElementById("outData0").innerHTML = fragmentString;
+
+        // Parse query string to see if page request is coming from OAuth 2.0 server.
+        var params = {};
+        var regex = /([^&=]+)=([^&]*)/g, m;
+        while (m = regex.exec(fragmentString)) {
+          params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+        }
+
+        if (Object.keys(params).length > 0) {
+          localStorage.setItem('oauth2-test-params', JSON.stringify(params) );
+          if (params['state'] && params['state'] == 'try_sample_request') {
+            
+            // Get access_token from page
+            var params = JSON.parse(localStorage.getItem('oauth2-test-params'));
+            var ACCESS_TOKEN = params['access_token'];
+
+            // Call a method
+            // trySampleRequest();
+            fetch_post2bigquery();
+          }
+        }
+      }
+
+      // -------------------
+
+      async function total_process(){
+
+        // callback
+        // await step0_call_url_in_window_way1().then(function () {var returnedurl = window.location.href; document.getElementById("outData0").innerHTML = returnedurl;})
+
+        // promise, then callback
+        // await step0_call_url_in_window_way1().then(res => res).then(res => {setTimeout( function() { var returnedurl = window.location.href; document.getElementById("outData0").innerHTML = returnedurl; }, 3000)})
+        
+        // It waits to send the form
+        // await step0_call_url_in_window_way1()
+        // setTimeout( function() { var returnedurl = window.location.href; document.getElementById("outData0").innerHTML = returnedurl; }, 3000)
+
+        await step0_call_url_in_window_way1();
+      }
+
+      // -------------------
+
+      // Different ways to make function calls in sequence
+
+      // return a promise of function_name, and then return a callback of the promise - you always have an output from function_name (like undefined)
+      // await function_name().then(response => response.json).then(response => { output res or other commands})
+
+      // return a callback of function_name, and do a sequential function call
+      // await function_name().then(response => (do something with response)).then(function() {do other commands without response})
+
+      // return the output of function_name
+      // await function_name().then(function(response) {output response or other commands})
+
+      // call function_name and then run some other commands sequentially
+      // await function_name().then(function() {other commands})
+
+      // await function_name().then(() => {other commands})
+
+      async function sequential_events(){
+
+        try {
+          // await step0_call_url_in_window_way1();
+
+          // DOES NOT WORK: It returns the callback before page/url changes
+          await total_process().then(() => { 
+            
+            // {}
+            google.script.url.getLocation(function(location) {document.getElementById("outData0").innerHTML = JSON.stringify(location.parameters, null, 2)})
+            // OR
+            // google.script.run.withSuccessHandler(function(result){var url = e.parameter.url; document.getElementById("outData0").innerHTML = url;}).get_url();
+            // OR
+            var winRef = window.location.href; 
+            // The steps are:
+          // [0] the initial url is the deployment URL, [1] the URL changes to something else (https://n-r2pbtrsqsf2gx46eesq7qdxgjigesuvhrdh5waq-0lu-script.googleusercontent.com/userCodeAppPanel)
+           // document.getElementById("outData0").innerHTML = winRef; 
+          // [2] it contacts OAuth2 with GET
+          // [3] OAuth2 changes the URL to the redirect_uri with the authorization_code  
+          // so calling it here means that I am likely to start monitoring at or after step [1]
+
+          // if the evenlister is always running after it is called like a trigger function running for infinity, shouldn't it catch all paage changes regardless of timing
+
+          // start monitoring for a page change where the url contains #
+          // window.addEventListener("hashchange", function(){ document.getElementById("outData1").innerHTML = window.location.href; });
+
+          // Maybe slowing down the execution of page events makes it run
+          // wait 5000 ms before starting to monitor a url change
+          setTimeout( function() { document.getElementById("outData1").innerHTML = 'here'; }, 500);
+
+          return winRef;
+          })
+          .then(function(winRef) {
+            for (var i=0; i < 500; i++){
+              // https://developers.google.com/apps-script/guides/html/reference/url#locationObject
+              // google.script.url.getLocation(function(location) {document.getElementById("outData1").innerHTML = JSON.stringify(location.parameters, null, 2)})
+              // OR
+              // google.script.run.withSuccessHandler(function(result){var url = e.parameter.url;document.getElementById("outData1").innerHTML = url;}).get_url();
+              // OR
+              document.getElementById("outData1").innerHTML = window.location.href;
+            }
+            // OR
+            // window.addEventListener("hashchange", function(){ })
+          })
+
+          // The final url is 
+          // https://script.google.com/macros/s/AKfycbxlPnt0dpuOhLOcydEJ0GdWSPD2BFf3W3BvMTLY6pJP/dev#state=pass-through&access_token=ya29.a0AfB_byCgmk7gR6Brji_3HFOwLpEGDGgKmQG_kdgT-RkYgYw2mCj2ysLgf5bWBt0tiZuryzSE7qPSJ75iN9w66sA2BkMj6qdY_TWVjty2f3zc8b4bOlac0ffehvnxYzxiS_acySbCNV8rMXGhjUsZWjeBEvayoPU-bQaCgYKAXwSARASFQHGX2MiOnJ28zZx_7iH7fKPfb8Ijg0169&token_type=Bearer&expires_in=3599&scope=https://www.googleapis.com/auth/bigquery
+
+        } catch (error) {
+          document.getElementById("outData1").innerHTML = error;
+        }
+        
+
+      }
+
+
+
+
+      function step0_call_url_in_window_way1(){
+
+        // https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow
+
+        // Google's OAuth 2.0 endpoint for requesting an access token
+        var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
+
+        // var returnedurl = window.location.href; 
+        // document.getElementById("outData0").innerHTML = returnedurl;
+        // https://n-r2pbtrsqsf2gx46eesq7qdxgjigesuvhrdh5waq-0lu-script.googleusercontent.com/userCodeAppPanel
+
+        // Create <form> element to submit parameters to OAuth 2.0 endpoint.
+        var form = document.createElement('form');
+        form.setAttribute('method', 'GET'); // Send as a GET request.
+        form.setAttribute('action', oauth2Endpoint);
+
+        // Parameters to pass to OAuth 2.0 endpoint.
+        var params = {'client_id': CLIENT_ID, 'response_type': 'token', 'redirect_uri': REDIRECT_URI, 'scope': SCOPES, 'include_granted_scopes': 'true', 'state': 'pass-through value'};
+
+        // Add form parameters as hidden input values.
+        for (var p in params) {
+          var input = document.createElement('input');
+
+          // input.setAttribute('type', 'visible');
+          // input.setAttribute('name', p);
+          // input.setAttribute('value', params[p]);
+          // OR
+          input.innerHTML = '<input type="visible" name='+p+' value='+params[p]+'>';
+
+          form.appendChild(input);
+        }
+
+        // Add form to page and submit it to open the OAuth 2.0 endpoint.
+        document.body.appendChild(form);
+        form.submit();
+
+      }
+
+      // -------------------
+
+      // Fetch POST to BigQuery table
+      async function fetch_post2bigquery(){
+
+        // var payAccess_key = document.getElementById("payAccess_key").value;
+        // document.getElementById("outData1").innerHTML = payAccess_key;
+        var payAccess_key = "username3";
+
+        var projectId = "observations-of-data-scientist";
+        // ar datasetId = "payAccess";
+        // var tableId = "payAccess_table";
+
+        // desired columns wanted from the table
+        // var selectedFields = "accesskey,paid";
+        // var view = "BASIC"; 
+        // var alt = "json (default)";
+        // var prettyPrint = true;
+        // var quotaUser = 256;
+
+        var location = "europe-west9";
+
+        //var url = `https://bigquery.googleapis.com/bigquery/v2/projects/${projectId}/queries`;
+        var url = "https://bigquery.googleapis.com/bigquery/v2/projects/"+projectId+"/queries";
+
+        // -----------------------------------
+        
+        var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + ACCESS_TOKEN};
+
+        // var data = {"query": "INSERT INTO $dataset_name.$TABLE_NAME (accesskey, paid) VALUES('user2', true);", 'location': location, "useLegacySql": false};
+        var data = {
+                  "query": "INSERT INTO $dataset_name.$TABLE_NAME (accesskey, paid) VALUES("+payAccess_key+", true);", 
+                  "location": location, 
+                  "useLegacySql": false
+                  };
+
+        var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+
+        // -----------------------------------
+
+        try {
+          // Output: Print text part to a text area
+          await fetch(url, options).then(res => res.json()).then(res => {document.getElementById("outData2").innerHTML = JSON.parse(JSON.stringify(res));})
+
+        } catch (error) {
+          document.getElementById("outData2").innerHTML = error;
+        }
+
+      }
+
+
+
+
+      </script>
+
+
+  </body>
+</html>
+
+
+
+
+
+
+---------------------------------
+Version 1
+---------------------------------
+      // ----------------------------------------
+      // STEP 3: Fetch POST to BigQuery table
+      // ----------------------------------------
+      
+      // BigQuery
+      const DISCOVERY_DOC = "https://bigquery.googleapis.com/discovery/v1/apis/bigquery/v2/rest";
+
+      // ----------------------------------------
+
+      function gapi_bigquery() {
+        // WORK with https://apis.google.com/js/api.js
+        gapi.load('client', fetch_post2bigquery_way1);
+      }
+
+
+      async function fetch_post2bigquery_way1(){
+        await gapi.client.init({
+                  apiKey: ACCESS_TOKEN, 
+                  discoveryDocs: [DISCOVERY_DOC], 
+                  client_id: CLIENT_ID, 
+                  fetch_basic_profile: true,
+                  scope: SCOPES // it does not output, the code breaks. So apparently it means that it does something
+                  // test: true,  // it outputs, but test is not a parameter. I could type anything and think that it is working because it does not give an error message.
+                  }).then(function() {
+
+                    
+                    // Calendar
+                    // Not Found
+                    // return gapi.client.calendar.events.list({'calendarId': 'primary', 'showDeleted': true, 'singleEvents': true, 'maxResults': 10});})
+                    
+
+                    // OR
+                    
+                    // Bigquery
+                    // API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication
+                    return gapi.client.bigquery.jobs.query({
+                        "projectId": "observations-of-data-scientist", 
+                        "prettyPrint": true, 
+                        "quotaUser": 256, 
+                        "query": "INSERT INTO payAccess.payAccess_table (accesskey, paid) VALUES('username5', true)", "location": "europe-west9", 
+                        "useLegacySql": false});})
+                    
+            
+                    .then(function(response) {document.getElementById("outData3").innerHTML = response;}
+                    );
+
+        }
