@@ -1,3 +1,1279 @@
+export PROJECT_ID=$(echo "observations-of-data-scientist")
+
+export LOCATION=$(echo "europe-west9")
+
+export dataset_name=$(echo "payAccess")
+export TABLE_NAME=$(echo "payAccess_table")
+
+gcloud config set project $PROJECT_ID
+
+# Remove TABLE_name
+bq rm -t $PROJECT_ID:$dataset_name.$TABLE_NAME
+
+# https://cloud.google.com/bigquery/docs/schemas
+bq mk --table $PROJECT_ID:$dataset_name.$TABLE_NAME accesskey:STRING,paid:BOOL
+bq mk --table $PROJECT_ID:$dataset_name.$TABLE_NAME accesskey:STRING
+
+
+# Add a value to the table
+bq query --location=$LOCATION --allow_large_results --use_legacy_sql=false "INSERT INTO $dataset_name.$TABLE_NAME (accesskey, paid) VALUES('username', true);"
+
+# View table 
+bq query --location=$LOCATION --allow_large_results --use_legacy_sql=false 'SELECT * FROM `'$PROJECT_ID'.'$dataset_name'.'$TABLE_NAME'`;'
+
+
+# Calendar API	
+gcloud services disable calendar-json.googleapis.com
+
+gcloud services enable driveactivity.googleapis.com
+
+gcloud services enable drive.googleapis.com
+
+gcloud services enable bigquery.googleapis.com
+
+gcloud services enable people.googleapis.com
+
+
+# ---------------------------------------------
+# Try: make a Service Account and obtain an OAuth2 token 
+# ---------------------------------------------
+
+# Following instructions at: https://cloud.google.com/iam/docs/create-short-lived-credentials-direct?hl=en#rest
+
+gcloud services enable iam.googleapis.com iamcredentials.googleapis.com
+
+# Make a Service Account
+export SERVICE_ACCOUNT_EMAIL=$(echo "j622amilah@gmail.com")
+export SERVICE_ACCOUNT_ID=$(echo "observations-webappSA")
+export SERVICE_ACCOUNT=$SERVICE_ACCOUNT_ID@$PROJECT_ID.iam.gserviceaccount.com
+
+# ---------------------------------------------
+
+# Create a service account
+
+gcloud iam service-accounts create $SERVICE_ACCOUNT_ID --description="Creating a service account for a webapp" --display-name="Observations webapp"
+# Created service account [observations-webappSA].
+
+# ---------------------------------------------
+
+# Delete a service account
+# https://cloud.google.com/sdk/gcloud/reference/iam/service-accounts/delete
+
+gcloud iam service-accounts delete $SERVICE_ACCOUNT
+# deleted service account [observations-webapp-SA@observations-of-data-scientist.iam.gserviceaccount.com]
+
+# ---------------------------------------------
+
+# List service accounts in the project
+
+gcloud iam service-accounts list
+DISPLAY NAME: Observations webapp
+EMAIL: observations-webapp-SA@observations-of-data-scientist.iam.gserviceaccount.com
+DISABLED: False
+
+# ---------------------------------------------
+
+# Add a role to a service account (https://cloud.google.com/iam/docs/understanding-roles)
+
+# Error, I did not read the directions
+# roles/bigquery.admin - user
+gcloud projects add-iam-policy-binding $PROJECT_ID --member="user:"$SERVICE_ACCOUNT_EMAIL --role='roles/bigquery.admin'
+ACCOUNT_EMAIL --role='roles/bigquery.admin'
+Updated IAM policy for project [observations-of-data-scientist].
+bindings:
+- members:
+  - user:j622amilah@gmail.com
+  role: roles/bigquery.admin
+- members:
+  - user:j622amilah@gmail.com
+  role: roles/owner
+etag: BwYMYcB1LT0=
+version: 1
+
+# ---------------------------------------------
+
+# Add a role to a service account (https://cloud.google.com/iam/docs/understanding-roles)
+
+# I went to https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/generateAccessToken
+and I read under 'Path parameters name' that I need to add this role iam.serviceAccounts.getAccessToken
+
+# I went to https://cloud.google.com/iam/docs/understanding-roles, and searched getAccessToken and found the role below
+
+# roles/iam.serviceAccountTokenCreator - user
+gcloud projects add-iam-policy-binding $PROJECT_ID --member="user:"$SERVICE_ACCOUNT_EMAIL --role='roles/iam.serviceAccountTokenCreator'
+
+Updated IAM policy for project [observations-of-data-scientist].
+bindings:
+- members:
+  - user:j622amilah@gmail.com
+  role: roles/bigquery.admin
+- members:
+  - user:j622amilah@gmail.com
+  role: roles/iam.serviceAccountTokenCreator
+- members:
+  - user:j622amilah@gmail.com
+  role: roles/owner
+etag: BwYMYm5xh6A=
+version: 1
+
+
+# Need to look up how to to remove a role
+- members:
+  - user:j622amilah@gmail.com
+  role: roles/bigquery.admin
+
+# ---------------------------------------------
+
+# Delete a user role from a service account (https://cloud.google.com/iam/docs/understanding-roles)
+
+gcloud iam service-accounts remove-iam-policy-binding observations-webapp-SA@observations-of-data-scientist.iam.gserviceaccount.com --member='user:j622amilah@gmail.com' --role='roles/bigquery.admin'
+
+# OR
+
+gcloud iam service-accounts remove-iam-policy-binding $SERVICE_ACCOUNT --member="user:"$SERVICE_ACCOUNT_EMAIL --role='roles/bigquery.admin'
+
+# ---------------------------------------------
+
+# roles/iam.serviceAccountTokenCreator - serviceaccount
+gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="roles/iam.serviceAccountTokenCreator"
+
+Updated IAM policy for project [observations-of-data-scientist].
+bindings:
+- members:
+  - user:j622amilah@gmail.com
+  role: roles/bigquery.admin
+- members:
+  - serviceAccount:observations-webappSA@observations-of-data-scientist.iam.gserviceaccount.com
+  - user:j622amilah@gmail.com
+  role: roles/iam.serviceAccountTokenCreator
+- members:
+  - user:j622amilah@gmail.com
+  role: roles/owner
+etag: BwYMZCf1xWc=
+version: 1
+
+# ---------------------------------------------
+
+# Go to https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/generateAccessToken and use the REST API to first be certain that the command parameters are correct, before trying to connect with JavaScript.
+
+# I read somewhere that the required parameters are
+
+name: the - after projects/ is called a wildcard character and is required; replacing it with a project ID is invalid. 
+
+projects/-/serviceAccounts/observations-webappSA
+"Invalid form of account ID observations-webappSA. Should be [Gaia ID |Email |Unique ID |] of the account"
+
+projects/-/serviceAccounts/j622amilah@gmail.com
+"Not found; Gaia id not found for email j622amilah@gmail.com"
+
+projects/-/serviceAccounts/observations-webapp-SA@observations-of-data-scientist.iam.gserviceaccount.com
+
+ A GAIA ID is an abbreviation of”Google Account and ID Administration” which is a unique ID of an account on Google. 
+
+
+request body
+{
+  "lifetime": "300s",
+  "scope": [
+    "https://www.googleapis.com/auth/cloud-platform"
+  ]
+}
+
+
+DOES NOT WORK
+{
+  "error": {
+    "code": 400,
+    "message": "Invalid form of account ID observations-webappSA. Should be [Gaia ID |Email |Unique ID |] of the account",
+    "status": "INVALID_ARGUMENT"
+  }
+}
+# ---------------------------------------------
+
+# Tried with CLI - WORKS
+
+# PRIV_SA: The email address of the privilege-bearing service account for which the short-lived token is created. 
+
+DOES NOT WORK
+PRIV_SA="j622amilah@gmail.com"
+ERROR: (gcloud.auth.print-access-token) Failed to impersonate [PRIV_SA]. Make sure the account that's trying to impersonate it has access to the service account itself and the "roles/iam.serviceAccountTokenCreator" role.
+
+WORKS!
+PRIV_SA="observations-webappSA@observations-of-data-scientist.iam.gserviceaccount.com"
+ERROR: (gcloud.auth.print-access-token) Failed to impersonate [PRIV_SA]. Make sure the account that's trying to impersonate it has access to the service account itself and the "roles/iam.serviceAccountTokenCreator" role.
+
+gcloud auth print-access-token --impersonate-service-account=$PRIV_SA
+
+You should receive a response similar to the following:
+WARNING: This command is using service account impersonation. All API calls will be executed as [observations-webappSA@observations-of-data-scientist.iam.gserviceaccount.com].
+ya29.c.c0AY_VpZjwFTqIwigssBqXmnZVjw1MVRam-Pkk3G8KaSYCde9gCgPnoJT2Wb4ujHtXzl1QuYafbmxOqkPZmZDOKTK-d_WR7MiEKBX-enhxuJCLIewEoq5up48ZAQoE8BbcY3nm9eRCRHKJ8E5j6FcoEHpv326sczTsw0WHYljX7daYV-YL2_G0DL1TSYJv3MoSUH2fb6U8PpdPYGX2LOtDvMoqcIROA8Xc5bRqpWZOrstm8hhYJfj6lrKb4n0wepi4N6AKq_MZME0ruCuN_gsf08VKQoO8NCxIV6gBWhP6GtUtt_NEFm-BRDuYX9fAacQRf75sLIbZe5cn6hYtPDv5KbLXZ6nQFRkBGyf12hFBJM2Ks1wqjR5BSpsxMYGP14IIl68oX8xhfIHnAcc3sjhtW7DHuc04sm9IgSjd31mgElrr8rDP6uRRtRm6qA4u-_9Zw4qEGXDSOtZ53zMVIvHnqCZISXcVTgPIWWcGx318e9wIu7Gf-FDITbkP0zLEwPujeIU6FjY-IoMSAHGjtJVrtRz26cXRpJD1l1Y7vjH26waAeT8fDp2T-8p5qlcWkIp-ewqgjRDmu2TaDgIc3fotRcloMDT3BlGwk9EuDBSPI1kYWgEcGRCFIC0Jaj9_wKxL17NEbGF9c1hTqZIcftP4H9d6krQ-IEQ9ZCSKQYUxLmDaE693CMRBVsilshdhvlO2XUWc9vht5ivlm2Q5u3-I8k3pcfuv6rynlaIdpbtYMw2x83YzmXQ15urxflbaZ19btFYoQWo83rfSop4yg0hRege-XfFu5kkrx45OsU90xWaZl4YO3kb-xMRS_VjFB-uoXQ4QVV4rpRsqdqbvs94gUq0mudXozx2k05V9Q7gU7Mjkv-jc1aYraJuJxQzFoY1c3-d4ubz7aUF-vOsXzc59XxxtcJibceOYRf86o4gRhtloWwbqU3d1SnUxl4ZfS0smxwBnOhMYY9UO7o47jtp9lpbyU5hcx-641j_ZlzXrviViehfV1zSuJ3I
+
+# ---------------------------------------------
+
+
+
+
+
+
+// ----------------------------------
+
+To try
+
+- 
+
+functions that work
+gapi.load('client:auth2', initializeGapiClient_way1);
+
+gapi.client.init({apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC], client_id: CLIENT_ID, fetch_basic_profile: true});
+
+      - can use a promise structure (then) to return values
+
+// The JavaScript function that handles returned token response
+var tokenClient = google.accounts.oauth2.initTokenClient({client_id: CLIENT_ID, scope: SCOPES, callback: ''});
+
+
+FUNCTION that I did not try in the gapi library
+
+
+functions that do not work
+gapi.auth2.getAuthInstance().isSignedIn.get()
+gapi.auth2.getAuthInstance().signIn();
+gapi.auth2.getAuthInstance().signOut();
+gapi.client.setApiKey(API_KEY)
+gapi.auth.authorize({client_id: CLIENT_ID, scope: SCOPES, immediate: true}, handleAuthResult);
+
+// ----------------------------------
+
+
+// -----------------
+      // Step 1: authorize the project scopes, "Callback after Google Identity Services are loaded."
+      function init_way1_step1() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: '', 
+        });
+        
+        // Verify that it successfully connected
+        var initialized_scopes = true;
+        document.getElementById("outData1").innerHTML = "initialized_scopes";
+      }
+
+      // -----------------
+
+      // Step 2: the user needs to sign-in with the pop-up auth2 screen
+      function init_way1_step2() {
+        
+        // Prints nothing
+        // document.getElementById("outData2").innerHTML = gapi.client.getToken();
+
+        // Printed
+        // document.getElementById("outData2").innerHTML = "authorize_button: before";
+
+        // Can not print anything in the callback
+        tokenClient.callback = async (resp) => {
+          try {
+            document.getElementById('authorize_button').innerText = 'Refresh';
+            
+            // Verify that it successfully connected
+            document.getElementById("outData2").innerHTML = "authorize_button pushed";
+
+          } catch (error) {
+            document.getElementById("outData2").innerHTML = error;
+          }
+          
+          // Run desired Google Services
+          //await listUpcomingEvents();
+        };
+
+        if (gapi.client.getToken() === null) {
+          // Prompt the user to select a Google Account and ask for consent to share their data
+          // when establishing a new session.
+          tokenClient.requestAccessToken({prompt: 'consent'});
+
+        } else {
+          // Skip display of account chooser and consent dialog for an existing session.
+          tokenClient.requestAccessToken({prompt: ''});
+        }
+
+      }
+
+      // OR
+
+      // -----------------
+
+      // Step 3: Use the Calendar API
+      async function init_way1_step3() {
+
+        // Defines an empty local variable
+        let response;
+
+        try {
+
+          // Requests information
+          const request = {
+            'calendarId': 'primary',
+            'timeMin': (new Date()).toISOString(),
+            'showDeleted': false,
+            'singleEvents': true,
+            'maxResults': 10,
+            'orderBy': 'startTime',
+          };
+
+          response = await gapi.client.calendar.events.list(request);
+
+        } catch (err) {
+          document.getElementById('outData3').innerText = err.message;
+          return;
+        }
+
+        const events = response.result.items;
+
+        if (!events || events.length == 0) {
+          document.getElementById('outData3').innerText = 'No events found.';
+          return;
+        }
+
+        // Flatten to string to display
+        const output = events.reduce(
+            (str, event) => `${str}${event.summary} (${event.start.dateTime || event.start.date})\n`,
+            'Events:\n');
+
+        document.getElementById('outData3').innerText = output;
+      }
+
+      // -----------------
+
+      // Step 4: the user needs to sign-out when they are finished
+      function init_way1_step4() {
+        const token = gapi.client.getToken();
+
+        if (token !== null) {
+          google.accounts.oauth2.revoke(token.access_token);
+          gapi.client.setToken('');
+          document.getElementById('content').innerText = '';
+          document.getElementById('authorize_button').innerText = 'Authorize';
+          document.getElementById('signout_button').style.visibility = 'hidden';
+        }
+      }
+
+      // -----------------
+
+
+
+
+
+
+SCOPES
+0. See and download any calendar you can access using your Google Calendar 
+.../auth/calendar.readonly
+const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
+
+1. See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account. 
+.../auth/cloud-platform
+
+2.  Insert data into Google BigQuery: https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
+
+
+
+
+BigQuery API, v2
+Scopes; https://developers.google.com/identity/protocols/oauth2/scopes
+https://www.googleapis.com/auth/bigquery	View and manage your data in Google BigQuery and see the email address for your Google Account
+https://www.googleapis.com/auth/bigquery.insertdata	Insert data into Google BigQuery
+https://www.googleapis.com/auth/cloud-platform	See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account.
+https://www.googleapis.com/auth/cloud-platform.read-only	View your data across Google Cloud services and see the email address of your Google Account
+https://www.googleapis.com/auth/devstorage.full_control	Manage your data and permissions in Cloud Storage and see the email address for your Google Account
+https://www.googleapis.com/auth/devstorage.read_only	View your data in Google Cloud Storage
+https://www.googleapis.com/auth/devstorage.read_write	Manage your data in Cloud Storage and see the email address of your Google Account
+
+
+
+----------------------------------------------------
+Things to try
+----------------------------------------------------
+/**
+ * Creates an event in the user's default calendar.
+ * @see https://developers.google.com/calendar/api/v3/reference/events/insert
+ */
+function createEvent(list_events) {
+  const calendarId = 'primary';
+
+  for (var i=0; i<list_events.length; i++){
+
+    // dayOffset is every [time_period in days], so for 2 weeks (1, 14, 21 )
+  }
+
+  const start = getRelativeDate(dayOffset, 0);
+  const end = getRelativeDate(1, 24);
+
+  // event details for creating event.
+  let event = {
+    summary: schedule_list[i],
+    location: 'TBD',
+    description: 'Career transition training.',
+    start: {
+      dateTime: start.toISOString()
+    },
+    end: {
+      dateTime: end.toISOString()
+    },
+    attendees: [{email: user_email_address}],
+    // Red background. Use Calendar.Colors.get() for the full list.
+    colorId: 11
+  };
+  try {
+    // call method to insert/create new event in provided calandar
+    event = Calendar.Events.insert(event, calendarId);
+    console.log('Event ID: ' + event.id);
+  } catch (err) {
+    console.log('Failed with error %s', err.message);
+  }
+}
+
+
+//https://developers.google.com/calendar/api/v3/reference/calendars
+/**
+ * Helper function to get a new Date object relative to the current date.
+ * @param {number} daysOffset The number of days in the future for the new date.
+ * @param {number} hour The hour of the day for the new date, in the time zone
+ *     of the script.
+ * @return {Date} The new date.
+ */
+function getRelativeDate(daysOffset, hour) {
+  const date = new Date();
+  date.setDate(date.getDate() + daysOffset);
+  date.setHours(hour);
+  date.setMinutes(0);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
+  return date;
+}
+
+
+
+
+async function authorize_google_access() {
+  var nameService = getService();
+  return 'Finished authorization! Select an automated task.'
+}
+
+function authCallback(request) {
+  var nameService = getService();
+  var isAuthorized = nameService.handleCallback(request);
+  if (isAuthorized) {
+    return HtmlService.createHtmlOutput('Success! You can close this tab.');
+  } else {
+    return HtmlService.createHtmlOutput('Denied. You can close this tab');
+  }
+}
+
+function getService() {
+  // Create a new service with the given name. The name will be used when
+  // persisting the authorized token, so ensure it is unique within the
+  // scope of the property store.
+
+  var ClientID = '224463091033-okvre3a92sfrlk39inqfhjq33ma2t8dm.apps.googleusercontent.com';
+  var ClientSecret = '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';
+
+  return OAuth2.createService('gmail')
+
+      // Set the endpoint URLs, which are the same for all Google services.
+      .setAuthorizationBaseUrl('https://accounts.google.com/o/oauth2/auth')
+      .setTokenUrl('https://accounts.google.com/o/oauth2/token')
+
+      // Set the client ID and secret, from the Google Developers Console.
+      .setClientId(ClientID)
+      .setClientSecret(ClientSecret)
+
+      // Set the name of the callback function in the script referenced
+      // above that should be invoked to complete the OAuth flow.
+      .setCallbackFunction('authCallback')
+
+      // Set the property store where authorized tokens should be persisted.
+      .setPropertyStore(PropertiesService.getUserProperties())
+
+      // Set the scopes to request (space-separated for Google services).
+      // OAuth2 Google Fit scopes: https://developers.google.com/fit/rest/v1/authorization
+      // OAuth2 Gmail scopes: https://developers.google.com/gmail/api/auth/scopes
+      // OAuth2 Google Calendar scopes: https://developers.google.com/calendar/api/auth
+      .setScope('https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile')
+    
+      // Sets the login hint, which will prevent the account chooser screen
+      // from being shown to users logged in with multiple accounts.
+      .setParam('login_hint', Session.getActiveUser().getEmail())
+
+      // Requests offline access.
+      .setParam('access_type', 'offline')
+}
+
+
+
+
+
+
+
+
+----------------------------------------------------
+# tables.update 
+https://cloud.google.com/bigquery/docs/reference/rest/v2/tables/update
+----------------------------------------------------
+
+
+
+{
+  "schema": {
+    "fields": [
+      {
+        "name": "accesskey",
+        "type": "STRING"
+      },
+      {
+        "name": "obs5",
+        "type": "STRING"
+      },
+      {
+        "name": "obs6",
+        "type": "STRING"
+      },
+      {
+        "name": "obs7",
+        "type": "STRING"
+      },
+      {
+        "name": "obs8",
+        "type": "STRING"
+      },
+      {
+        "name": "obs9",
+        "type": "STRING"
+      },
+      {
+        "name": "obs10",
+        "type": "STRING"
+      },
+      {
+        "name": "obs11",
+        "type": "STRING"
+      },
+      {
+        "name": "obs12",
+        "type": "STRING"
+      },
+      {
+        "name": "obs13",
+        "type": "STRING"
+      },
+      {
+        "name": "obs14",
+        "type": "STRING"
+      },
+      {
+        "name": "obs15",
+        "type": "STRING"
+      },
+      {
+        "name": "obs16",
+        "type": "STRING"
+      },
+      {
+        "name": "obs17",
+        "type": "STRING"
+      },
+      {
+        "name": "obs18",
+        "type": "STRING"
+      },
+      {
+        "name": "obs19",
+        "type": "STRING"
+      },
+      {
+        "name": "obs20",
+        "type": "STRING"
+      },
+      {
+        "name": "obs21",
+        "type": "STRING"
+      }
+    ]
+  },
+  "tableReference": {
+    "projectId": "observations-of-data-scientist",
+    "datasetId": "payAccess",
+    "tableId": "payAccess_table"
+  },
+
+
+
+----------------------------------------------------
+# uploads - it means to add a data file to a BigQuery table
+https://cloud.google.com/bigquery/docs/reference/api-uploads
+----------------------------------------------------
+"load": {"sourceFormat": "{"accesskey": "hello", "obs5": "false", "obs6": "true", "obs7": "false", "obs8": "false", "obs9": "false", "obs10": "false", "obs11": "false", "obs12": "false", "obs13": "false", "obs14": "false", "obs15": "false", "obs16": "false", "obs17": "false", "obs18": "false", "obs19": "false", "obs20": "false", "obs21": "false"}"}
+
+# OR
+
+"load": {"sourceFormat": "{"accesskey": "hello", "obs5": "false", "obs6": "true", "obs7": "false", "obs8": "false", "obs9": "false", "obs10": "false", "obs11": "false", "obs12": "false", "obs13": "false", "obs14": "false", "obs15": "false", "obs16": "false", "obs17": "false", "obs18": "false", "obs19": "false", "obs20": "false", "obs21": "false"}"}
+
+
+,
+  "destinationTable": {
+    "projectId": "observations-of-data-scientist",
+    "datasetId": "payAccess",
+    "tableId": "payAccess_table"
+  }
+
+
+----------------------------------------------------
+# tables.insert - it means to create a new BigQuery table
+POST https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/datasets/{datasetId}/tables
+----------------------------------------------------
+var projectId = "observations-of-data-scientist";
+var datasetId = "payAccess";
+var alt = "json (default)"
+var fields = "INSERT_COLUMN_NAME0,INSERT_COLUMN_NAME1"
+var prettyPrint = true
+var quotaUser = 256;
+
+{
+  "tableReference": {
+    "projectId": "observations-of-data-scientist",
+    "datasetId": "payAccess",
+    "tableId": "INSERT_NEW_TABLE_NAME_HERE"
+  },
+  "schema": {
+    "fields": [
+      {
+        "name": "INSERT_COLUMN_NAME0",
+        "type": "STRING"
+      },
+      {
+        "name": "INSERT_COLUMN_NAME1",
+        "type": "STRING"
+      }
+    ]
+  }
+}
+----------------------------------------------------
+
+
+
+----------------------------------------------------
+# tables.get - it means to create a BigQuery table
+POST https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/datasets/{datasetId}/tables
+----------------------------------------------------
+# full version example
+{
+  "kind": "bigquery#table",
+  "etag": "6JNd7KpXD3riqQK38iHFgw==",
+  "id": "observations-of-data-scientist:payAccess.payAccess_table",
+  "selfLink": "https://content-bigquery.googleapis.com/bigquery/v2/projects/observations-of-data-scientist/datasets/payAccess/tables/payAccess_table",
+  "tableReference": {
+    "projectId": "observations-of-data-scientist",
+    "datasetId": "payAccess",
+    "tableId": "payAccess_table"
+  },
+  "schema": {
+    "fields": [
+      {
+        "name": "accesskey",
+        "type": "STRING"
+      },
+      {
+        "name": "obs5",
+        "type": "STRING"
+      },
+      {
+        "name": "obs6",
+        "type": "STRING"
+      },
+      {
+        "name": "obs7",
+        "type": "STRING"
+      },
+      {
+        "name": "obs8",
+        "type": "STRING"
+      },
+      {
+        "name": "obs9",
+        "type": "STRING"
+      },
+      {
+        "name": "obs10",
+        "type": "STRING"
+      },
+      {
+        "name": "obs11",
+        "type": "STRING"
+      },
+      {
+        "name": "obs12",
+        "type": "STRING"
+      },
+      {
+        "name": "obs13",
+        "type": "STRING"
+      },
+      {
+        "name": "obs14",
+        "type": "STRING"
+      },
+      {
+        "name": "obs15",
+        "type": "STRING"
+      },
+      {
+        "name": "obs16",
+        "type": "STRING"
+      },
+      {
+        "name": "obs17",
+        "type": "STRING"
+      },
+      {
+        "name": "obs18",
+        "type": "STRING"
+      },
+      {
+        "name": "obs19",
+        "type": "STRING"
+      },
+      {
+        "name": "obs20",
+        "type": "STRING"
+      },
+      {
+        "name": "obs21",
+        "type": "STRING"
+      }
+    ]
+  },
+  "numBytes": "128",
+  "numLongTermBytes": "0",
+  "numRows": "1",
+  "creationTime": "1701963829793",
+  "expirationTime": "1707147829793",
+  "lastModifiedTime": "1701963904289",
+  "type": "TABLE",
+  "location": "europe-west9",
+  "numTimeTravelPhysicalBytes": "0",
+  "numTotalLogicalBytes": "128",
+  "numActiveLogicalBytes": "128",
+  "numLongTermLogicalBytes": "0",
+  "numTotalPhysicalBytes": "1547",
+  "numActivePhysicalBytes": "1547",
+  "numLongTermPhysicalBytes": "0"
+}
+
+
+----------------------------------------------------
+# tables.get - it means to create a BigQuery table
+POST https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/datasets/{datasetId}/tables
+----------------------------------------------------
+
+
+
+----------------------------------------------------
+
+----------------------------------------------------
+The difference between `gapi.auth2.getAuthInstance().signIn()` and `google.accounts.oauth2.initTokenClient` is that they are part of different client libraries and are used for different purposes.
+
+`gapi.auth2.getAuthInstance().signIn()` is a method from the `gapi.auth2` client library which is used to initiate the Google Sign-In process. It allows users to authenticate and sign in using their Google credentials. This method is typically used for signing in to Google services or applications that require user authentication.
+
+On the other hand, `google.accounts.oauth2.initTokenClient` is a method from the `google.accounts.oauth2` client library which is used to initialize an OAuth 2.0 client for making API requests. This method is typically used for server-to-server communication, where an application needs to obtain access tokens to authenticate and authorize API requests on behalf of users or itself.
+
+In summary, `gapi.auth2.getAuthInstance().signIn()` is used for user authentication and sign-in, while `google.accounts.oauth2.initTokenClient` is used for initializing an OAuth 2.0 client to make API requests.
+
+
+
+----------------------------------------------------
+client-side JavaScript application
+----------------------------------------------------
+To perform OAuth2 authentication for requests made with the gapi.client library, you can follow these steps:
+
+1. Register your application with the Google Cloud Console and obtain your client ID and client secret. Make sure you have the necessary OAuth2 scopes configured for the requested API.
+
+2. Include the Google API client library in your application. You can include the library by adding the following script tag to your HTML file:
+```html
+<script src="https://apis.google.com/js/api.js"></script>
+```
+
+3. Initialize the client library and specify your client ID and the API you want to access. For example:
+```javascript
+gapi.load('client', () => {
+  gapi.client.init({
+    clientId: 'YOUR_CLIENT_ID',
+    scope: 'YOUR_SCOPES',
+  }).then(() => {
+    // Perform API requests
+  });
+});
+```
+Replace `'YOUR_CLIENT_ID'` with your actual client ID, and `'YOUR_SCOPES'` with the OAuth2 scopes required by the API you want to access.
+
+4. Before making any requests, you need to authorize the user and obtain an access token. You can do this using the `gapi.auth2` object:
+```javascript
+gapi.auth2.getAuthInstance().signIn().then(() => {
+  // User is now signed in and you have an access token
+  // Perform API requests
+});
+```
+This will open a consent screen for the user to authorize your application and obtain their consent to access their data.
+
+5. Once the user is authenticated and authorized, you can make API requests using the `gapi.client` object. For example, to make a request to the Google Drive API:
+```javascript
+gapi.client.drive.files.list().then((response) => {
+  const files = response.result.files;
+  console.log('Files:', files);
+}, (error) => {
+  console.error('Error:', error);
+});
+```
+
+Remember to handle any errors that may occur during the authentication or API request process.
+
+Please note that this example assumes you are working with a client-side JavaScript application. If you are working with a server-side application, the process may be slightly different and involve using server-specific libraries or frameworks.
+
+
+----------------------------------------------------
+Error 400: redirect_uri_mismatch usually occurs when the redirect URI specified in the request doesn't match the redirect URI listed in the OAuth client configuration on the Google Cloud Console.
+
+To fix this issue, you can follow these steps:
+
+1. Go to the Google Cloud Console (https://console.cloud.google.com/).
+2. Navigate to your project and select the "OAuth consent screen" tab from the left menu.
+3. Ensure that the "Authorized redirect URIs" field contains the correct redirect URI that you are using in your application.
+4. If the redirect URI is missing or incorrect, add or update it.
+5. Save the changes and try your request again.
+
+By ensuring that the redirect URI in your request matches the redirect URI configured in the OAuth client settings, you should be able to resolve the redirect_uri_mismatch error.
+
+----------------------------------------------------
+
+
+----------------------------------------------------
+OAuth consent screen
+----------------------------------------------------
+User type: External 
+
+App name: streaming_service0
+User support email: j622amilah@gmail.com
+
+App domain
+Application home page: 
+
+If you have a google apps script attached to a spreadsheet, put the spreadsheet URL:
+https://docs.google.com/spreadsheets/d/1UV38bXGj5l04qrocKH7-m65exa3P01MoJBbXHrHqWIw/edit#gid=0
+
+If you have a google apps script ONLY, put the google apps script deployment URL: 
+https://script.google.com/macros/s/AKfycbyf7iedOyEn2hTk3-rlqJ9FCX8DHXkw1OaROr0UZ8g/dev
+https://script.google.com/macros/s/AKfycbxlPnt0dpuOhLOcydEJ0GdWSPD2BFf3W3BvMTLY6pJP/dev
+
+
+Application privacy policy link: https://github.com/j622amilah/userservicesite/blob/main/README.md
+
+Application terms of service link: https://github.com/j622amilah/userservicesite/blob/main/README.md
+
+Authorized domains
+When a domain is used on the consent screen or in an OAuth client’s configuration, it must be pre-registered here. If your app needs to go through verification, please go to the Google Search Console to check if your domains are authorized. Learn more about the authorized domain limit. 
+
+Authorized domain 1
+j622amilah.github.io
+
+Authorized domain 2
+www.googleapis.com
+
+Authorized domain 3
+github.com
+
+Authorized domain 4
+google.com
+
+If you have a google apps script ONLY, put google.com.
+
+Developer contact information
+Email addresses: j622amilah@gmail.com
+
+----------------------------------------------------
+
+Scopes express the permissions you request users to authorize for your app and allow your project to access specific types of private user data from their Google Account. https://developers.google.com/identity/protocols/oauth2/scopes
+
+Your non-sensitive scopes
+API, Scope, User-facing description
+No rows to display
+
+Your sensitive scopes
+Sensitive scopes are scopes that request access to private user data.
+API, Scope, User-facing description
+No rows to display
+	
+Your restricted scopes
+Restricted scopes are scopes that request access to highly sensitive user data.
+API, Scope, User-facing description
+No rows to display
+
+----------------------------------------------------
+
+Test users
+
+While publishing status is set to "Testing", only test users are able to access the app. Allowed user cap prior to app verification is 100, and is counted over the entire lifetime of the app. https://support.google.com/cloud/answer/7454865
+
+User information: j622amilah@gmail.com 	
+
+----------------------------------------------------
+
+
+----------------------------------------------------
+OAuth Credentials
+----------------------------------------------------
+Name: observations_webapp
+The name of your OAuth 2.0 client. This name is only used to identify the client in the console and will not be shown to end users. 
+
+The domains of the URIs you add below will be automatically added to your OAuth consent screen as authorized domains. 
+
+OAuth consent screen URL: https://console.cloud.google.com/apis/credentials/consent?project=observations-of-data-scientist
+Authorized domains: https://support.google.com/cloud/answer/6158849#authorized-domains&zippy=%2Cauthorized-domains
+
+----------------------------------------------------
+
+Authorized JavaScript origins
+The HTTP origins that host your web application. This value can't contain wildcards or paths. If you use a port other than 80, you must specify it. For example: https://example.com:8080 
+
+For use with requests from a browser
+
+URIs 1: https://script.google.com
+
+----------------------------------------------------
+
+Authorized redirect URIs
+Users will be redirected to this path after they have authenticated with Google. The path will be appended with the authorization code for access, and must have a protocol. It can’t contain URL fragments, relative paths, or wildcards, and can’t be a public IP address.
+
+For use with requests from a web server 
+
+URIs 1: https://script.google.com/macros/s/AKfycbyf7iedOyEn2hTk3-rlqJ9FCX8DHXkw1OaROr0UZ8g/dev
+
+----------------------------------------------------
+
+Note: It may take 5 minutes to a few hours for settings to take effect 
+
+----------------------------------------------------
+
+To solve the "redirect_uri_mismatch" error, you need to ensure that the redirect URI specified in your Google Cloud Platform project matches the redirect URI in your code.
+
+Here are some steps to follow:
+
+1. Go to the Google Cloud Platform (console.cloud.google.com).
+2. Open your project and navigate to the OAuth consent screen.
+3. Make sure that the authorized JavaScript origins and redirect URIs match the ones specified in your code.
+4. If they don't match, either update your code to use the correct values or update the authorized origins and redirect URIs in your project.
+5. Save your changes.
+6. Retry the `tokenClient.requestAccessToken()` function with the updated redirect URI.
+
+If the issue persists, make sure you have completed the necessary configuration steps for OAuth in your Google Cloud Platform project and that the client ID and client secret are correctly configured.
+
+Please note that the specific steps may vary depending on the Google Cloud Platform project setup and the programming language you are using.
+
+----------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------
+To try
+----------------------------------------------------
+
+- Clean up code
+	- do not put form call in an async
+
+- run it, look in browser at localStorage
+	- cookieConsent under local storage for https://script.google.com
+
+
+- call the OAuth2 server with POST
+
+----------------------------------------------------
+
+
+to do 
+
+- need to add onload - added
+	- on sure it works
+	- says 'We're sorry, a server error occurred. Please wait a bit and try again.'
+
+- need to add the part that knows which row to insert the output  
+	- not quite right : need to feed dict value to two other functions, fixed it by asking user to insert the spreadsheet row they want and reading the value
+	- works
+
+
+----------------------------------------------------
+
+- There was doubt about localStorage being able to store browser variables without deployment, but it is confirmed that without deployment the browser CAN NOT be accessed so Spreadsheet variables can not be stored in localStorage
+
+- Re-organized server to the past version so that automated responses are put on the server spreadsheet
+
+
+
+to do 
+- Need to set up javascript spreadsheet for client-users to manipulate and copy-paste into their Google Spreadsheets
+	- The client Google Spreadsheet can open a popup window to the Server where they query the robot
+
+- need to figure out how to calculate the score
+	- DONE
+
+----------------------------------------------------
+
+<!-- &nbsp;&nbsp;&nbsp;<button id="close_window" onclick="window.location.close();">Close window</button>&nbsp;&nbsp;&nbsp;<button id="reload_window" onclick="window.location.assign('https://script.google.com/macros/s/AKfycbxFNzlG5-P1tn0_2UhfZ0iZtOFJMLIpLinP71PVFf5b/dev');">Reload window</button> -->
+
+// Wanted to see if I could just run it without having to push the button - it would be better
+// window.addEventListener("load", (event) => { fill_a_row(); });
+
+----------------------------------------------------
+
+To do
+
+- change database code for getting longer token - still using the OAuth-clientAPI linked to my account
+	- with this the server works running off my account: I need to change the token every 12-24 hours 
+	- someone says that it will ask users to sign in...
+
+- then change the OAuth-API to server: 
+
+- then start doing each of the observation buttons (6 - 21, plus the one main exercise page/button (How to start taking responsibility for your life)) 
+
+
+Minor
+- main exercise works! : https://script.google.com/macros/s/AKfycby1oGsT2jjor72i9QglJohTgiB20oM7G4ZYN72UD7M8ajBxBmLzmvDNbIdo-Hoz-Zn1-w/exec
+	- Need to make a main exercise page/button
+	- Need to put the client .csv file in the userservice folder OR specified_GCP_project storage - so users can just download the file  (OR figure out how they can open in their google drive
+	  WITHOUT me sharing it with them)
+
+
+
+- before launch: transfer the userservice site to CodeSolutions2 - then website will be with the organization name and have nothing to do with my personal account
+
+----------------------------------------------------
+
+
+To make a deployed Google Apps Script receive a POST request with a parameter named "username," you can follow these steps:
+
+1. Open your Google Apps Script project in the Apps Script editor.
+2. Write a function to handle the POST request and retrieve the "username" parameter. Here's an example:
+
+```javascript
+function doPost(e) {
+  var params = e.parameter;
+  var username = params.username;
+  
+  // Do something with the username
+  Logger.log('Received username: ' + username);
+  
+  // Return a response
+  var response = ContentService.createTextOutput('POST request received');
+  return response;
+}
+```
+
+3. Save your project.
+4. Deploy your Google Apps Script as a web app:
+   - Click on the "Deploy" menu.
+   - Choose "New deployment."
+   - Configure the deployment settings, such as the version and access permissions.
+   - Under "Execute the app as," choose your own Google account or user accessing the web app.
+   - Under "Who has access to the app," select the appropriate access level.
+   - Click "Deploy" to generate a deployment URL.
+  
+5. Once deployed, you can send a POST request to the deployment URL with the "username" parameter set. Here's an example using cURL:
+
+```bash
+curl -X POST -d 'username=johndoe' <deployment_url>
+```
+
+6. Check the Apps Script execution logs to see the log output generated by your function.
+
+That's it! Your deployed Google Apps Script is now ready to receive a POST request with a "username" parameter. Remember to secure your application by implementing appropriate authentication and authorization mechanisms if necessary.
+
+
+----------------------------------------------------
+
+To print the received POST request parameter to a Google Sheet using Google Apps Script, you can follow these steps:
+
+1. Open your Google Sheet and go to the Script Editor by clicking on "Tools" > "Script editor" in the menu.
+
+2. In the Script Editor, write the following code:
+
+```javascript
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var parameterValue = e.parameter.yourParameterName;
+  sheet.appendRow([parameterValue]);
+
+  return ContentService.createTextOutput('Parameter value added to the sheet.');
+}
+```
+
+Replace "yourParameterName" with the actual name of the parameter you expect to receive in the POST request.
+
+3. Save the script by clicking on "File" > "Save".
+
+4. Deploy the script as a web app by clicking on "Publish" > "Deploy as web app" in the menu.
+
+5. In the deployment settings, make sure to select the following:
+
+   - Project version: "New"
+   - Execute the app as: Your Google account
+   - Who has access to the app: Anyone, even anonymous
+
+6. Click on "Deploy" and you will be provided with a URL for your web app.
+
+7. Use the provided URL as the endpoint for your POST request, passing the parameter in the request payload.
+
+When a POST request is made to the deployed web app URL with the parameter, the parameter value will be appended as a new row in the active sheet of your Google Sheet.
+
+Note: Make sure you have the necessary permissions to access and modify the Google Sheet.
+
+----------------------------------------------------
+
+In Google Apps Script, the `doPost` function is automatically called when a POST request is made to your deployed endpoint. The `e` parameter in the `doPost(e)` function represents the event object that contains the request details.
+
+By default, the `e` parameter has the following properties:
+- `parameter`: An object containing the POST request parameters.
+- `parameters`: An object containing both the GET and POST request parameters.
+- `contextPath`: The context path of the script URL.
+- `contentLength`: The length of the request content.
+- `queryString`: The query string part of the URL.
+- `postData`: A `Blob` object containing the request data.
+
+To access the POST request parameter, you can use `e.parameter` object. For example, if your POST request parameter is named `myParam`, you can retrieve it as `e.parameter.myParam`.
+
+Here's an example code for handling a POST request and accessing the parameter using Google Apps Script:
+
+```javascript
+function doPost(e) {
+  var myParam = e.parameter.myParam;
+  
+  // Do something with the parameter value
+  
+  // Return a response (optional)
+  return ContentService.createTextOutput("Request received successfully");
+}
+```
+
+Make sure that your deployed endpoint URL is correctly formatted, as it should include the project's Google Apps Script "exec" ID. The endpoint URL would look like this: `https://script.google.com/macros/s/{EXEC_ID}/exec`.
+
+Remember to test your endpoint using a tool like Postman or by making a POST request from your application to the deployed endpoint.
+
+----------------------------------------------------
+
+
+
+google.script.history provides methods to allow dynamic response to browser history changes. This includes: pushing states (simple Objects you can define) onto the browser history, replacing the top state in the history stack, and setting a listener callback function to respond to history changes.
+
+google.script.url provides the means to retrieve the current page's URL parameters and URL fragment, if they are present.
+
+
+--------------------------------------------------------------------------------------------------------
+
+I did GET from client - the client page changed to the server page - and the url was the following on the client browser
+https://script.google.com/macros/s/AKfycbylXxyKOntU1cjG3Aqu79Ggk0AQ__DjMP8q8T1IZz2lR0pOjmXSTIzfH6V6pPcO4qwv/exec?username=username&submit_button=submit_button
+
+https://script.google.com/macros/s/AKfycbylXxyKOntU1cjG3Aqu79Ggk0AQ__DjMP8q8T1IZz2lR0pOjmXSTIzfH6V6pPcO4qwv/exec?username=jjjjjjj
+
+function doGet(e) {
+  
+  // The endpoint returns the HTML page if a GET request is made to the url
+  //return HtmlService.createHtmlOutputFromFile('index');
+
+  // The endpoint returns the url if a GET request is made to the url
+  // var url = e.parameter.url;
+  return ContentService.createTextOutput(e.parameter.username);
+}
+
+----------------------------------------------------
+
+I did POST from client - the client page changed to the message that I desginated from the server - no data from client is received on the server
+
+function doPost(e) {
+  // https://developers.google.com/apps-script/guides/web
+
+  // Declaring parameters that the endpoint should receive as data in the POST request
+  var username = e.parameter.username;
+
+  // -----------------------------
+  // Q: how do I get the parameter that was sent to me?
+  // -----------------------------
+  // Way 0
+  console.log(username);
+  Logger.log('Received username: ' + username);
+
+  // -----------------------------
+
+  // Way 1
+  // Obtain the value that was sent from the client
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Sheet1");
+
+  var numRows = sheet.getLastRow() + 1;
+  var cell_letter = "C"
+  var str_val = cell_letter.concat(numRows.toString(), ":", cell_letter, numRows.toString())
+
+  var range = sheet.getRange(str_val);
+  range.setValues([ [username] ]);
+
+  // -----------------------------
+
+  // Way 2
+  PropertiesService.getScriptProperties().setProperty('username', 'test');
+  // Nothing is stored after a post request from a client - this function does not run on the server
+
+  // -----------------------------
+
+  // Return a response to user who made the post request
+  var text_sent_2_client_if_successful_POSTrequest = "POST request received";
+  var response = ContentService.createTextOutput(text_sent_2_client_if_successful_POSTrequest);
+  
+  var json_response = response.setMimeType(ContentService.MimeType.JSON);
+  var text_response = response.setMimeType(ContentService.MimeType.PLAIN_TEXT);
+  
+  // Q: Do I need to call doPost? no I do not need to call it. In Google Apps Script, the `doPost` function is automatically triggered when a POST request is made to the endpoint. You can access the POST request parameters directly within the `doPost` function using the `e` parameter.
+
+  return response;
+}
+
+----------------------------------------------------
+
+----------------------------------------------------
+
+----------------------------------------------------
+
+----------------------------------------------------
+
+----------------------------------------------------
+
+----------------------------------------------------
+
+----------------------------------------------------
+
+Quantifying incremental points per action maybe more realistic than quantifying an absolute error to acheiving a goal, because one may never accomplish the goal. However, understanding that each incremental action is or is not effective could increase one's chance to obtain closeness to the goal.
+
+
+
+
+
+
+
+
+
+
+
+
 target
 
     Where to display the linked URL, as the name for a browsing context (a tab, window, or <iframe>). The following keywords have special meanings for where to load the URL:
