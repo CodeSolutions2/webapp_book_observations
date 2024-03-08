@@ -1,0 +1,406 @@
+
+
+
+// ------------------------------------------
+// index.html
+// ------------------------------------------
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    
+    <textarea id="outData0" rows="4" cols="100" placeholder="outData0" style="display:none"></textarea>
+
+    <br><br>
+
+    <textarea id="outData1" rows="4" cols="100" placeholder="outData1" style="display:none"></textarea>
+
+    <br><br>
+
+    <textarea id="outData2" rows="4" cols="100" placeholder="outData2" style="display:none"></textarea>
+
+    <br><br>
+    
+    <button id="myBtn" onclick="fill_a_row()">Run spreadsheet selection</button>
+
+
+
+<script onload="fill_a_row()"></script>
+
+
+<script>
+
+  // ********************************************************
+
+
+  function fill_a_row() {
+    get_positive_actions_for_a_response();
+    get_negative_actions_for_a_response();
+    // get_score_to_success();
+  }
+
+
+  // ********************************************************
+
+
+  async function get_positive_actions_for_a_response(){
+
+      // -------------------------------------
+      // Get values from the spreadsheet
+      // -------------------------------------
+      google.script.run.withSuccessHandler(function(result){ 
+        localStorage.setItem('OPENAI_API_KEY', result.OPENAI_API_KEY); 
+        localStorage.setItem('response', result.response); 
+        localStorage.setItem('sheet_cell_num', result.sheet_cell_num); 
+      }).get_Spreadsheet_values(); 
+
+
+
+      // -------------------------------------
+      // Call the API
+      // -------------------------------------
+
+      // Get values from localStorage
+      var OPENAI_API_KEY = localStorage.getItem('OPENAI_API_KEY');
+      var response = localStorage.getItem('response');
+
+      // ------------------------------------------
+
+      // var prompt = `Give three actions that one can perform in the next day that will improve the problem: ${response}. Put the actions in an itemized list, from most effective to least effective.`;
+
+      var prompt = "Give three positive actions that one can perform in the next day that will improve the problem: "+response+". Put the actions in an itemized list, from most effective to least effective. Use the least number of words.";
+
+      var temperature = 0;
+      var model_name = 'gpt-3.5-turbo';
+
+      // ------------------------------------------
+
+      var system_content = "You are a helpful assistant";
+      var assistant_content = "Respond concisely";
+      var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
+      var data = {"model": model_name, 'messages': messages, 'temperature': temperature};
+      var url = 'https://api.openai.com/v1/chat/completions';
+      var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+      var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+
+      // ------------------------------------------
+
+      try {
+        // -------------------------------------
+        // Put the values from the API to the spreadsheet
+        // -------------------------------------
+        const text_out = await fetch(url, options).then(res => res.json()).then(res => {document.getElementById("outData0").innerHTML = JSON.stringify(res); var out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content']; google.script.run.withSuccessHandler(function(result){ }).put_Spreadsheet_values_positive(out); return JSON.stringify(res)})
+      } 
+      catch (error) 
+      {
+        document.getElementById("outData0").innerHTML = error;
+      }
+
+      
+    } // end of async function get_actions_for_a_response()
+
+
+// ********************************************************
+
+
+async function get_negative_actions_for_a_response(){
+
+      // -------------------------------------
+      // Call the API
+      // -------------------------------------
+
+      // Get values from localStorage
+      var OPENAI_API_KEY = localStorage.getItem('OPENAI_API_KEY');
+      var response = localStorage.getItem('response');
+
+      // ------------------------------------------
+
+      // var prompt = `Give three actions that one can perform in the next day that will improve the problem: ${response}. Put the actions in an itemized list, from most effective to least effective.`;
+
+      var prompt = "Give three negative actions that one should not perform in the next day that will make the problem worst: "+response+". Put the actions in an itemized list, from most uneffective to least uneffective. Use the least number of words.";
+
+      var temperature = 0;
+      var model_name = 'gpt-3.5-turbo';
+
+      // ------------------------------------------
+
+      var system_content = "You are a helpful assistant";
+      var assistant_content = "Respond concisely";
+      var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
+      var data = {"model": model_name, 'messages': messages, 'temperature': temperature};
+      var url = 'https://api.openai.com/v1/chat/completions';
+      var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+      var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+
+      // ------------------------------------------
+
+      try {
+        // -------------------------------------
+        // Put the values from the API to the spreadsheet
+        // -------------------------------------
+        const text_out = await fetch(url, options).then(res => res.json()).then(res => {document.getElementById("outData1").innerHTML = JSON.stringify(res); var out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content']; google.script.run.withSuccessHandler(function(result){ }).put_Spreadsheet_values_negative(out); return JSON.stringify(res)})
+      } 
+      catch (error) 
+      {
+        document.getElementById("outData1").innerHTML = error;
+      }
+
+      
+    } // end of async function get_actions_for_a_response()
+
+
+    // ********************************************************
+
+
+    async function get_score_to_success(){
+
+      // -------------------------------------
+      // Call the API
+      // -------------------------------------
+
+      // Get values from localStorage
+      var OPENAI_API_KEY = localStorage.getItem('OPENAI_API_KEY');
+      var response = localStorage.getItem('response');
+
+      // ------------------------------------------
+
+      // var prompt = `Give three actions that one can perform in the next day that will improve the problem: ${response}. Put the actions in an itemized list, from most effective to least effective.`;
+
+      var prompt = "Give three negative actions that one should not perform in the next day that will make the problem worst: "+response+". Put the actions in an itemized list, from most uneffective to least uneffective. Use the least number of words.";
+
+      var temperature = 0;
+      var model_name = 'gpt-3.5-turbo';
+
+      // ------------------------------------------
+
+      var system_content = "You are a helpful assistant";
+      var assistant_content = "Respond concisely";
+      var messages = [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}];
+      var data = {"model": model_name, 'messages': messages, 'temperature': temperature};
+      var url = 'https://api.openai.com/v1/chat/completions';
+      var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + OPENAI_API_KEY};
+      var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+
+      // ------------------------------------------
+
+      try {
+        // -------------------------------------
+        // Put the values from the API to the spreadsheet
+        // -------------------------------------
+        const text_out = await fetch(url, options).then(res => res.json()).then(res => {document.getElementById("outData2").innerHTML = JSON.stringify(res); var out = JSON.parse(JSON.stringify(res))['choices'][0]['message']['content']; google.script.run.withSuccessHandler(function(result){ }).put_Spreadsheet_values_score(out); return JSON.stringify(res)})
+      } 
+      catch (error) 
+      {
+        document.getElementById("outData2").innerHTML = error;
+      }
+
+      
+    } // end of async function get_actions_for_a_response()
+
+    // ----------------------------------------------------
+
+</script>
+
+  </body>
+</html>
+
+
+
+
+
+
+
+// ------------------------------------------
+// Code.gs
+// ------------------------------------------
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('App functionality')
+      .addItem('Run app', 'run_webapp')
+      .addToUi();
+}
+
+// ------------------------------------------
+
+function run_webapp() {
+  
+  var js2html_data = "https://script.google.com/macros/s/AKfycbxFNzlG5-P1tn0_2UhfZ0iZtOFJMLIpLinP71PVFf5b/dev";
+
+  var html_texte = '<html><head></head><body><script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>'
+ + '<script>function ouvrir_fenetre() { winRef = window.open("'+js2html_data+'", "winRef", target="width=500,height=500"); }</script>'
++ '<button onclick="ouvrir_fenetre(); ">[1] Run spreadsheet selection</button>'
++ '<br><br>'
+ + '<button onclick="closeWin();">[3] Close the popups</button>'
+ + '<script>function closeWin() { if (winRef) {  winRef.close(); google.script.host.close();}; }</script>'
+  + '</body></html>';
+
+  var html_objet = HtmlService.createHtmlOutput(html_texte);
+  html_objet.js2html_data = js2html_data;
+
+  SpreadsheetApp.getUi().showModalDialog(html_objet, 'PopUp');
+}
+
+// ------------------------------------------
+
+function doGet() {
+    return HtmlService.createHtmlOutputFromFile('index');
+}
+
+// ------------------------------------------
+
+function get_Spreadsheet_values() {
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Sheet1");
+
+  var dictt = {};
+
+  // Read the key
+  dictt.OPENAI_API_KEY = sheet.getRange("A2").getValues();
+
+  // --------------------------------------------
+  // Automatic row selection of sheet
+  // --------------------------------------------
+  // Put mouse on a cell, get the row of the cell
+  // Try 0: it can not save the row number directly to dictionary, DOES NOT WORK always saves 1
+  // dictt.sheet_cell_num = sheet.getActiveCell().getRow();
+
+  // Try 1: it can print the row number to a cell, then try reading the row number from the cell, DOES NOT WORK always saves 1
+  // var range = sheet.getRange("A200");
+  // range.setValues([ [sheet.getActiveCell().getRow()] ]);
+  // dictt.sheet_cell_num = sheet.getRange("A200").getValues();
+  // --------------------------------------------
+
+  // --------------------------------------------
+  // Manual row selection of sheet
+  // --------------------------------------------
+  // Read the desired sheet row number
+  // dictt.sheet_cell_num = sheet.getRange("A4").getValues();  // Mindset using automatic row selection
+  // OR
+  sheet_cell_num = sheet.getRange("A4").getValues();
+  // --------------------------------------------
+
+  // Get user input: response 
+  var cell_letter = "B"
+  var str_val = cell_letter.concat(sheet_cell_num.toString(), ":", cell_letter, sheet_cell_num.toString())
+  dictt.response = sheet.getRange(str_val).getValues();
+
+  // Mindset using automatic row selection
+  // PropertiesService.getScriptProperties().setProperty('dictt', dictt);
+
+  return dictt;
+}
+
+// ------------------------------------------
+
+function put_Spreadsheet_values_positive(out) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Sheet1");
+
+  // --------------------------------------------
+  // Manual row selection of sheet
+  // --------------------------------------------
+  sheet_cell_num = sheet.getRange("A4").getValues();
+  // --------------------------------------------
+
+  // I should have access to the global variable dictt
+  // Get positive action model response
+  var cell_letter = "C"
+  var str_val = cell_letter.concat(sheet_cell_num.toString(), ":", cell_letter, sheet_cell_num.toString())
+
+  var range = sheet.getRange(str_val);
+  range.setValues([ [out] ]);
+}
+
+// ------------------------------------------
+
+function put_Spreadsheet_values_negative(out) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Sheet1");
+
+  // --------------------------------------------
+  // Manual row selection of sheet
+  // --------------------------------------------
+  sheet_cell_num = sheet.getRange("A4").getValues();
+  // --------------------------------------------
+  
+  // Get negative action model response
+  var cell_letter = "G"
+  var str_val = cell_letter.concat(sheet_cell_num.toString(), ":", cell_letter, sheet_cell_num.toString())
+  
+  var range = sheet.getRange(str_val);
+  range.setValues([ [out] ]);
+}
+
+// ------------------------------------------
+
+
+// Way 1: Simplest and most straight-forward way - but DID NOT WORK - I do not know why
+function put_Spreadsheet_values_positive_way1(){
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Sheet1");
+  
+  OPENAI_API_KEY = sheet.getRange("A2").getValues();
+
+  // --------------------------------------------
+  // Manual row selection of sheet
+  // --------------------------------------------
+  // Read the desired sheet row number
+  // dictt.sheet_cell_num = sheet.getRange("A4").getValues();  // Mindset using automatic row selection
+  // OR
+  sheet_cell_num = sheet.getRange("A4").getValues();
+  // --------------------------------------------
+
+  // Get user input: response 
+  var cell_letter = "B"
+  var str_val = cell_letter.concat(sheet_cell_num.toString(), ":", cell_letter, sheet_cell_num.toString())
+  response = sheet.getRange(str_val).getValues();
+
+  // ------------------------------------------
+
+  var temperature = 0;
+  var system_content = "You are a helpful assistant";
+  var assistant_content = "Respond concisely";
+
+  var prompt = "Give three actions that one can perform in the next day that will improve the problem: "+response+". Put the actions in an itemized list, from most effective to least effective.";
+
+  // Desired prompt
+  // var data = {"model": "gpt-3.5-turbo", "messages": [{"role": "system", "content": system_content}, {"role": "user", "content": prompt}, {"role": "assistant", "content": assistant_content}], "temperature": temperature};
+
+  // OR
+  
+  // Base test prompt
+  var data = {"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "what is 2+2?"}], "temperature": temperature};
+  
+  // ------------------------------------------
+
+  const url = 'https://api.openai.com/v1/chat/completions';
+
+  // ------------------------------------------
+
+  var headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + OPENAI_API_KEY}
+
+  var options = {'method' : 'post', 'headers': headers, 'body' : JSON.stringify(data), muteHttpExceptions : true};
+
+  // Exception: Request failed for https://api.openai.com returned code 400. Truncated server response: { "error": { "message": "We could not parse the JSON body of your request. (HINT: This likely means you aren't using your HTTP library ... (use muteHttpExceptions option to examine full response)
+
+  // ------------------------------------------
+
+  // Output response to the spreadsheet
+  var res = UrlFetchApp.fetch(url, options);
+
+  // Get positive action model response
+  var cell_letter = "C"
+  var str_val = cell_letter.concat(sheet_cell_num.toString(), ":", cell_letter, sheet_cell_num.toString())
+  
+  var range = sheet.getRange(str_val);
+  range.setValues([ [JSON.parse(JSON.stringify(res))['choices'][0]['message']['content']] ]);
+
+  // ------------------------------------------
+
+}
+
+// ------------------------------------------
