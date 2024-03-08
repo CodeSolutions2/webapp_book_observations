@@ -2548,3 +2548,668 @@ function get_parameters_from_event(e) {
 function getTopUrl(){
   return ScriptApp.getService().getUrl();
 }
+
+
+
+function doGet(e) {
+
+  // Needs to receive POST requests with ONE parameter called username
+  
+  // It says that if I add ?action=get&username=username_value to my deployed URL I can get username_value
+  // Q: how does my webapp_server even know that it wants to receive username_value?
+  // Q: how do I add the 
+  //  - and then send the username POST_request_payload to be confirmed with my account token
+
+
+
+  // Maybe server should be attached to a spreadsheet to temporarily store the username requests - and then send the username to the 
+  // BigQuery database (dynami)
+  var arrayStored = HtmlService.createHtmlOutputFromFile('index');
+
+  console.log(arrayStored);
+
+  //localStorage.setItem("accessToken", accessToken)
+  // Store the variable in script properties
+  // PropertiesService.getScriptProperties().setProperty('accessToken', accessToken);
+
+  arrayStored.access_token = e.parameters.access_token;
+
+  return arrayStored
+  // the e argument represents an event parameter that can contain information about any request parameters
+}
+
+
+// ---------------------------------------------------
+
+// Need to do a GET to the Deployed HTML page
+
+async function print_scrape_text(URL) {
+
+  // GET fetch REST API
+  var response = UrlFetchApp.fetch(URL);
+  
+  // Obtain the html page: it is a lot of text so it is necessary to output only certain parts of the HTML page
+  // const pageHTML = response.getContentText();
+  
+  // need to figure out where is access_token in pageHTML
+  
+  console.log(response)
+  
+  return response
+}
+
+// ---------------------------------------------------
+
+function get_parameters_from_event(e) {
+  var params = JSON.stringify(e);
+  return ContentService.createTextOutput(params).setMimeType(ContentService.MimeType.JSON);
+}
+
+// ---------------------------------------------------
+
+// Just returns the original page url
+function getTopUrl(){
+  return ScriptApp.getService().getUrl();
+}
+
+
+// ---------------------------------------------------
+
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    
+    <!-- ---------------------------------- -->
+
+    <form action="https://accounts.google.com/o/oauth2/v2/auth" method="POST" id="id_of_form" onsubmit="return checkForm(this)">
+    <div>
+      <input type="text" name="client_id" id="client_id" value="982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com" style="display:none;">
+    </div>
+    <div>
+      <input type="text" name="response_type" id="response_type" value='token' style="display:none;">
+    </div>
+    <div>
+      <input type="text" name="redirect_uri" id="redirect_uri" value="https://script.google.com/macros/s/AKfycbxlPnt0dpuOhLOcydEJ0GdWSPD2BFf3W3BvMTLY6pJP/dev" style="display:none;">
+    </div>
+    <div>
+      <!-- <input type="text" name="scope" id="scope" value="https://www.googleapis.com/auth/bigquery" style="display:none;"> -->
+      <input type="text" name="scope" id="scope" value="https://www.googleapis.com/auth/bigquery https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloud-platform.read-only" style="display:none;">
+    </div>
+    <div>
+      <input type="text" name="include_granted_scopes" id="include_granted_scopes" value='true' style="display:none;">
+    </div>
+    <div>
+      <input type="text" name="state" id="state" value='pass-through' style="display:none;">
+    </div>
+    <div>
+      <input type="text" name="expires_in" id="expires_in" value='43200' style="display:none;">
+    </div>
+    <button name="submit_button" value='submit_button' id="Submit" style='text-align: left;'>Submit</button>
+    </form>
+
+    <!-- ---------------------------------- -->
+
+
+    
+
+
+    <!-- JAVASCRIPT -->
+
+    <script>
+
+      // -------------------
+      // Verify that parameters save to MY PC
+      // I can only collect user information, and I must send the information from MY PC
+      // -------------------
+
+      // Read from the submitted form
+      // Display the key/value pairs on the form before and AFTER the GET/POST
+      var formObject = document.getElementById("id_of_form");
+      var form_elements = formObject.elements;
+
+      for (var i=0; i<form_elements.length; i++){
+        var key_value_pair = form_elements[i]; 
+
+        localStorage.setItem(key_value_pair.name, key_value_pair.value)
+      }
+      // ----------------------------------------
+
+
+
+
+      // ----------------------------------------
+      // STEP 3: Fetch POST to BigQuery table - WORKS
+      // ----------------------------------------
+      async function fetch_post2bigquery_way0(){
+
+        var payAccess_key = document.getElementById("payAccess_key").value;
+        // document.getElementById("outData1").innerHTML = payAccess_key;
+        //var payAccess_key = "username4";
+
+        var projectId = "observations-of-data-scientist";
+
+        var location = "europe-west9";
+
+        var url = "https://bigquery.googleapis.com/bigquery/v2/projects/"+projectId+"/queries";
+
+        // -----------------------------------
+        
+        var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + ACCESS_TOKEN};
+
+        var data = {
+                  "query": "INSERT INTO payAccess.payAccess_table (accesskey, paid) VALUES('"+payAccess_key+"', true)", 
+                  "location": location, 
+                  "useLegacySql": false
+                  };
+
+        var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+
+        // {"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"accesskey","type":"STRING"},{"name":"paid","type":"BOOLEAN"}]},"jobReference":{"projectId":"observations-of-data-scientist","jobId":"job_Pp7-j7SSw-VQF2Nqc1qBhoTzna9Y","location":"europe-west9"},"totalBytesProcessed":"0","jobComplete":true,"cacheHit":false,"numDmlAffectedRows":"1","dmlStats":{"insertedRowCount":"1"},"queryId":"job_Pp7-j7SSw-VQF2Nqc1qBhoTzna9Y"}
+
+        // -----------------------------------
+
+        try {
+          // Output: Print text part to a text area
+          await fetch(url, options).then(res => res.json()).then(res => {document.getElementById("outData2").innerHTML = JSON.stringify(res);})
+
+        } catch (error) {
+          document.getElementById("outData2").innerHTML = error;
+        }
+
+      }
+      // -----------------------------------
+
+
+  </body>
+</html>
+
+
+
+
+// ---------------------------------------------------
+// webapp_server
+// ---------------------------------------------------
+
+
+// ------------------------------
+// index.html
+// ------------------------------
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+    
+    <!-- HTML -->
+
+    <textarea id="outData0" style='display:block; text-align: left;' rows="1" cols="50" placeholder="outData0"></textarea>
+
+    <br><br>
+
+    <!-- ---------------------------------- -->
+
+
+    <!-- JAVASCRIPT -->
+
+    <script>
+      // google.script.run.withSuccessHandler(function(result){ }).doPost();
+
+
+    </script>
+
+  </body>
+</html>
+
+
+
+
+
+
+// ------------------------------
+// Code.gs
+// ------------------------------
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('App functionality')
+      .addItem('Run a function', 'test_output')
+      .addToUi();
+}
+
+// ---------------------------------------------------
+
+function doGet(e) {
+  
+  // The endpoint returns the HTML page if a GET request is made to the url
+  return HtmlService.createHtmlOutputFromFile('index');
+
+  // The endpoint returns the url if a GET request is made to the url
+  // var url = e.parameter.url;
+  //return ContentService.createTextOutput(e.parameter.username);
+}
+
+// ---------------------------------------------------
+
+// This function allows for an endpoint to receive a POST request.
+// One can create as many parameters under the variable parms as they like.
+// text_sent_2_client_if_successful_POSTrequest is the text that is sent to the client who makes a successful POST request
+
+function doPost(e) {
+  // https://developers.google.com/apps-script/guides/web
+
+  // Declare POST request variable
+  var username = e.parameter.username;
+
+
+  // Try 0: NO while loop
+  // -----------------------------
+  // Way 0: Obtain the value that was sent from the client, without while loop
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Sheet1");
+
+  var numRows = sheet.getLastRow() + 1;
+  var cell_letter = "D"
+  var str_val = cell_letter.concat(numRows.toString(), ":", cell_letter, numRows.toString())
+
+  var range = sheet.getRange(str_val);
+  range.setValues([ [username] ]);
+  // -----------------------------
+
+  // -----------------------------
+  // Way 1: Store variable in environmental variables
+  PropertiesService.getScriptProperties().setProperty('username', 'test');
+  // -----------------------------
+
+
+  // OR
+
+
+  /*
+  // -----------------------------
+  // Try 1: while loop to obtain value from POST request
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Sheet1");
+  // var numRows = sheet.getLastRow() + 1;
+  // var cell_letter = "C"
+  // var str_val = cell_letter.concat(numRows.toString(), ":", cell_letter, numRows.toString())
+  // var range = sheet.getRange(str_val);
+  
+  // Declaring parameters that the endpoint should receive as data in the POST request
+  // Stay in while loop, until a value is received; the doPost runs too fast maybe
+  while (username == null) {
+    numRows = numRows + 1;
+    str_val = cell_letter.concat(numRows.toString(), ":", cell_letter, numRows.toString())
+    range.setValues([ ["no value"] ]);
+  }
+
+  // -----------------------------
+  // Way 0: Obtain the value that was sent from the client, without while loop
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Sheet1");
+
+  var numRows = sheet.getLastRow() + 1;
+  var cell_letter = "D"
+  var str_val = cell_letter.concat(numRows.toString(), ":", cell_letter, numRows.toString())
+
+  var range = sheet.getRange(str_val);
+  range.setValues([ [username] ]);
+  // -----------------------------
+
+  // -----------------------------
+  // Way 1: Store variable in environmental variables
+  PropertiesService.getScriptProperties().setProperty('username', 'test');
+  // -----------------------------
+  */
+
+
+  // OR
+
+
+  /*
+  while (username != null) {
+    
+    // -----------------------------
+    // Way 0: Obtain the value that was sent from the client, without while loop
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName("Sheet1");
+
+    var numRows = sheet.getLastRow() + 1;
+    var cell_letter = "D"
+    var str_val = cell_letter.concat(numRows.toString(), ":", cell_letter, numRows.toString())
+
+    var range = sheet.getRange(str_val);
+    range.setValues([ [username] ]);
+    // -----------------------------
+
+    // -----------------------------
+    // Way 1: Store variable in environmental variables
+    PropertiesService.getScriptProperties().setProperty('username', 'test');
+    // -----------------------------
+  }
+  */
+
+  // Return a response to user who made the post request
+  var text_sent_2_client_if_successful_POSTrequest = "POST request received";
+  var response = ContentService.createTextOutput(text_sent_2_client_if_successful_POSTrequest);
+  
+  //var json_response = response.setMimeType(ContentService.MimeType.JSON);
+  //var text_response = response.setMimeType(ContentService.MimeType.PLAIN_TEXT);
+  
+  // Q: Do I need to call doPost? no I do not need to call it. In Google Apps Script, the `doPost` function is automatically triggered when a POST request is made to the endpoint. You can access the POST request parameters directly within the `doPost` function using the `e` parameter.
+
+  return response;
+}
+
+// ---------------------------------------------------
+
+function test_output(){
+
+  // GET fetch REST API
+  var URL = "https://script.google.com/macros/s/AKfycbxl1_H4WrLDCKVbxzFFiL15sbUBIA_HFSB_vqqzN_SqNDcdUDAISdw8JmQDKOXvK2sZ/exec";
+
+  var response = UrlFetchApp.fetch(URL);
+  // var response_short = response.slice(0,200)
+  // var response_short = response.substring(0,200);
+  var response_short = response[0];
+
+
+  // Idea 0: maybe the post request data is on the html page of the server. So webscrape the server webpage.
+  // If I do not have index.html, it can not webscrape the url of the server
+
+  // -----------------------------
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Sheet1");
+
+  var numRows = sheet.getLastRow() + 1;
+  var cell_letter = "C"
+  var str_val = cell_letter.concat(numRows.toString(), ":", cell_letter, numRows.toString())
+
+  var range = sheet.getRange(str_val);
+  
+  range.setValues([ [response_short] ]);
+
+  // -----------------------------
+
+  username2 = PropertiesService.getScriptProperties().getProperty('username');
+  var numRows = sheet.getLastRow() + 1;
+  var cell_letter = "D"
+  var str_val = cell_letter.concat(numRows.toString(), ":", cell_letter, numRows.toString())
+
+  var range = sheet.getRange(str_val);
+  range.setValues([ [username2] ]);
+
+  // -----------------------------
+
+}
+
+
+
+// ---------------------------------------------------
+
+// ---------------------------------------------------
+webapp_client
+// ---------------------------------------------------
+function doGet() {
+  // This creates the webapp for the user to submit their username to a url via a POST request
+  return HtmlService.createHtmlOutputFromFile('index');
+}
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    
+    <!-- HTML -->
+    <input id="payAccess_key" type="text" value="" placeholder="Create a unique non-personalized accesskey" rows="1" cols="50" style='text-align: center; width: 400px;'>
+
+    <br><br>
+
+    <!-- ---------------------------------- -->
+
+    <!-- Way 0: send a POST request using a form created by HTML -->
+    <!-- This outputs whether the response is successful or not, to: More Tools - Web Developer Tools -->
+    <form action="https://script.google.com/macros/s/AKfycbylXxyKOntU1cjG3Aqu79Ggk0AQ__DjMP8q8T1IZz2lR0pOjmXSTIzfH6V6pPcO4qwv/exec" method="GET" id="id_of_form" onsubmit="return checkForm(this)">
+    <!-- <label for="username">username</label> -->
+    <input type="text" name="username" id="username" value="username" style="display:none;">
+    
+    <button name="submit_button" value='submit_button' id="Submit" style='text-align: left;'>way0_sendPOST_form_HTML</button>
+    </form>
+    
+    <!-- ---------------------------------- -->
+
+
+    <br><br>
+
+    <!-- This outputs whether the response is successful or not, to: More Tools - Web Developer Tools -->
+    <button id="way1_sendPOST_form_Javascript" onclick="create_form_javascript_way1()" style='text-align: left; display:block;'>way1_sendPOST_form_Javascript</button>
+
+    <br><br>
+
+    <!-- This outputs whether the response is successful or not, to the textarea outData0 -->
+    <button id="way2_sendPOST_fetch_Javascript" onclick="fetch_post_2_webapp_server()" style='text-align: left; display:block;'>way2_sendPOST_fetch_Javascript</button>
+
+    <br><br>
+
+    <textarea id="outData0" style='text-align: left;' rows="4" cols="50" placeholder="outData0"></textarea>
+
+    <!-- ---------------------------------- -->
+
+    <!-- JAVASCRIPT -->
+    <script>
+      
+      var URL = 'https://script.google.com/macros/s/AKfycbylXxyKOntU1cjG3Aqu79Ggk0AQ__DjMP8q8T1IZz2lR0pOjmXSTIzfH6V6pPcO4qwv/exec';
+
+      // ----------------------------------------
+      // Way 1: send a POST request using a form created by JavaScript
+      // ----------------------------------------
+      function create_form_javascript_way1() {
+
+        var payAccess_key = document.getElementById("payAccess_key").value;
+
+        // Create <form> element to submit parameters to endpoint.
+        var form = document.createElement('form');
+
+        form.setAttribute('method', 'GET'); // Original code
+        // form.setAttribute('method', 'POST');
+
+        form.setAttribute('action', URL);
+
+        // Parameters to pass to endpoint.
+        var params = {'username': payAccess_key};
+
+        // Add form parameters as hidden input values.
+        for (var p in params) {
+          var input = document.createElement('input');
+
+          // input.setAttribute('type', 'visible');  // hidden
+          // input.setAttribute('name', p);
+          // input.setAttribute('value', params[p]);
+          // OR
+          // input.innerHTML = '<input type="visible" name='+p+' value='+params[p]+'>';
+          // OR
+          input.innerHTML = '<input style="display:none;" name='+p+' value='+params[p]+'>';
+          
+          form.appendChild(input);
+        }
+        // Add form to page and submit it to open the endpoint.
+        document.body.appendChild(form);
+
+        form.submit();
+      }
+
+      // ----------------------------------------
+
+      function checkForm(thisForm){
+
+        document.getElementById("outData0").innerHTML = "data sent";
+      }
+
+      // ----------------------------------------
+
+
+
+      // ----------------------------------------
+      // Way 2: send a POST request using fetch by HTML
+      // ----------------------------------------
+      async function fetch_post_2_webapp_server(){
+
+        var payAccess_key = document.getElementById("payAccess_key").value;
+
+        // -----------------------------------
+        
+        var headers = {"Content-Type": "application/json"};
+
+        var data = {"username": payAccess_key};
+
+        var options = {method : 'post', headers: headers, body : JSON.stringify(data), mode: 'no-cors'};
+
+        // -----------------------------------
+
+        try {
+          // Output: Print text part to a text area
+          await fetch(URL, options).then(res => res.json()).then(res => {document.getElementById("outData0").innerHTML = JSON.stringify(res);})
+
+        } catch (error) {
+          document.getElementById("outData0").innerHTML = error;
+        }
+
+      }
+      // -----------------------------------
+    </script>
+
+  </body>
+</html>
+
+
+
+
+
+
+// ---------------------------------------------------
+// Code.gs example
+// ---------------------------------------------------
+function doGet(e) {
+
+  // set up defaults
+  e = e || {};
+  e.parameter = e.parameter || {};
+  e.parameter.format = e.parameter.format || "json";
+  e.parameter.flight = e.parameter.flight || "ua938";
+
+  // get the flight data
+  var result = getFlight(e);
+
+  var content,
+  mime = e.parameter.callback ?
+  ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON;
+
+  // maybe XML is preferred
+  if (e.parameter.format.toLowerCase() === "xml") {
+    if (e.parameter.callback) {
+    result.status = "no callback possible for xml format";
+    }
+    mime = ContentService.MimeType.XML;
+    content = makeXml (result);
+    }
+    else {
+    // need a JSONP wrapper?
+    content = e.parameter.callback ?
+    e.parameter.callback + '(' + JSON.stringify(result) + ');' : content;
+  }
+
+  // serve up as contentservice
+  return ContentService.createTextOutput(content).setMimeType(mime);
+}
+
+
+
+// integrate call with search in spreadsheet
+function getFlight(e) {
+
+  // get the carrier data
+  var lookup = new SheetOb()
+  .open(Settings.LOOKUP.ID, Settings.LOOKUP.NAME).getData();
+
+  // get the regex based on the interesting airlines
+  var rx = new RegExp (getRegex(lookup) ,'i');
+
+  // match against the known airlines flight codes
+  var found = rx.exec(e.parameter.flight);
+
+  // store this message if it's got one
+  if (found) {
+    return {
+    status:"ok",
+    flight:found[0],
+    carrier:found[1],
+    name:lookup.filter(function(d) {
+      return d[Settings.HEADINGS.CODE].toLowerCase()
+      === found[1].toLowerCase();
+      })[0][Settings.HEADINGS.NAME]
+      };
+    }
+    else {
+      return {
+      status:'not found',
+      flight:e.parameter.flight
+    }
+  }
+}
+
+
+
+// ---------------------------------------------------
+// ---------------------------------------------------
+
+function doGet (e) {
+
+  // it does not explain what this function does
+  return doGetPattern(e, constructConsentScreen, doSomething, 'googleDatastore');
+
+  // Steps
+  // 0. client makes a GET request to webapp_server
+  // 1. server has an accessToken to Google, and will make a request on behalf of the client
+  // 2. server does a POST request to Google to use a service
+  //         - one gives: accessToken, consentUrl, redirectUrl and Google does all the rest of the programming - I have no clue what it does - it gives a response to the server that everything is ok or not
+
+  // So I can not copy how to make a client-server request from this example
+
+}
+
+// ---------------------------------------------------
+
+function doSomething (accessToken) {
+var options = {
+method: "POST",
+contentType : "application/json" ,
+muteHttpExceptions : true,
+headers: {
+"authorization": "Bearer " + accessToken,
+},
+payload:JSON.stringify({
+"query": {
+"kinds": [{"name":"polymerdbab"}]
+}
+})
+};
+var result = UrlFetchApp.fetch(
+"https://www.googleAPIs.com/datastore/v1beta2/" +
+"datasets/xliberationdatastore/runQuery"
+options);
+return HtmlService.createHtmlOutput (' it worked ' +
+accessToken + '<br>' + result.getContentText());
+}
+// ---------------------------------------------------
+
+function constructConsentScreen (consentUrl, redirectUrl) {
+  return '<p>Redirect URI to be added to cloud console is ' +
+redirectUrl + '</p><a href = "' + consentUrl + '">Click to authenticate to datastore</a> ';
+}
