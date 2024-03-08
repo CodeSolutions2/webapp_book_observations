@@ -394,3 +394,2157 @@ Version 1
                     );
 
         }
+
+
+------------------------------------------------------------------------------------------------------
+index_oauth2_way2
+------------------------------------------------------------------------------------------------------
+<!DOCTYPE html>
+<html>
+  <head></head>
+  <body>
+    <!-- HTML -->
+    <!-- Redirect page after PayPal payment is received -->
+    <h1 style='text-align: center; margin-bottom: -35px;'>Data Science Observations in a Chaotic World</h1>
+    <br><br>
+    <p style='text-align: center; margin-bottom: -35px;'>Congratulations on purchasing the remaining Observations 5-21! You are on your way to having a more observant and responsible career and life! 🎉</p>
+
+    <br><br>
+
+    Please create a non-personalized accesskey/username, such that the webapp knows that you paid. The webapp will store your non-personalized accesskey in a Google Cloud BigQuery database. When you enter your non-personalized accesskey in the webapp, the webapp will search the BigQuery database and give you permission to use the webapp. No personal payment information is stored.
+    
+    <br><br>
+
+    <label style="text-align: center;">Create a non-personalized accesskey to unlock Observations 5-21:</label><input id="payAccess_key" type="text" value="" placeholder="Create a unique non-personalized accesskey" rows="1" cols="50" style='text-align: center; width: 400px;'>
+    
+    <br><br>
+
+    <!-- call google.accounts.oauth2.initTokenClient FIRST, and then gapi -->
+    <button id="oauth2_gapi" onclick="oauth2_gapi()" style='text-align: left;'>oauth2_gapi</button>
+    <br><br>
+    <textarea id="outData0" style='text-align: left;' rows="4" cols="50" placeholder="outData0"></textarea>
+
+    <br><br>
+
+    <!-- call gapi FIRST, and then google.accounts.oauth2.initTokenClient -->
+    <button id="gapi_oauth2" onclick="gapi_oauth2()" style='text-align: left;'>gapi_oauth2</button>
+    <br><br>
+    <textarea id="outData1" style='text-align: left;' rows="4" cols="50" placeholder="outData1"></textarea>
+
+    <br><br>
+
+    <button id="gapi_oauth2_buttonhandle" onclick="gapi_oauth2_buttonhandle()" style='text-align: left;'>gapi_oauth2_buttonhandle</button>
+    <br><br>
+
+
+    <!-- --------------------------------------------------- -->
+    <!-- JAVASCRIPT -->
+    <!-- --------------------------------------------------- -->
+    <!-- call google.accounts.oauth2.initTokenClient FIRST, and then gapi -->
+
+    <!-- Automatically authenicates with OAuth2 -->
+    <!-- <script async defer src="https://accounts.google.com/gsi/client" onload="oauth2_gapi()"></script> -->
+
+    <!-- Automatically authenicates with the GCP_PROJECT_API_KEY -->
+    <!-- <script async defer src="https://apis.google.com/js/api.js"></script> -->
+
+    <!-- --------------------------------------------------- -->
+
+    <!-- call gapi.auth2 FIRST, then gapi.client -->
+    
+    <!-- For gapi.auth2 library -->
+    <!-- <script src="https://apis.google.com/js/platform.js?onload=oauth2_gapi" async defer></script>  -->
+    <!-- <script async defer src="https://apis.google.com/js/platform.js" onload="oauth2_gapi()"></script>-->
+
+    <!-- For gapi.client library -->
+    <!-- <script async defer src="https://apis.google.com/js/api.js" onload="oauth2_gapi()"></script> -->
+    
+    <!-- --------------------------------------------------- -->
+
+    <!-- call gapi FIRST, and then OAuth2-->
+
+    <!-- Automatically authenicates with the GCP_PROJECT_API_KEY -->
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapi_oauth2()"></script>
+    
+    <!-- Automatically authenicates with OAuth2 -->
+    <!-- <script async defer src="https://accounts.google.com/gsi/client"></script> -->
+
+    <!-- --------------------------------------------------- -->
+    
+    <script>
+      
+      // -----------------------------------
+
+      // If one wants to use an API that has PROJECT_API_KEY security only, one needs to use gapi.auth2.init.
+      
+      // If one wants to use an API that has OAuth2 security, one needs to use google.accounts.oauth2.initTokenClient
+
+      // -----------------------------------
+
+      // Google Calendar
+      // const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
+
+      // const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+
+      // https://developers.google.com/calendar/api/v3/reference/events/list
+      // GET https://www.googleapis.com/calendar/v3/calendars/calendarId/events
+
+      // -----------------------------------
+
+      // BigQuery
+      const DISCOVERY_DOC = "https://bigquery.googleapis.com/discovery/v1/apis/bigquery/v2/rest";
+
+      const SCOPES = "https://www.googleapis.com/auth/bigquery https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloud-platform.read-only";
+      
+      // POST https://bigquery.googleapis.com/bigquery/v2/projects/"+projectId+"/queries
+      
+      // -----------------------------------
+      
+      // Remove everyday ***
+      const API_KEY = "";
+      const CLIENT_ID = "";
+
+      // -----------------------------------
+
+      const REDIRECT_URI = "http://script.google.com";
+
+      // https://accounts.google.com/o/oauth2/auth?client_id={client_id}&response_type=token&redirect_uri={redirect_uri}&scope={scope}
+      
+
+      // https://accounts.google.com/o/oauth2/auth?client_id=982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com&response_type=token&redirect_uri=https://script.google.com&scope=https://www.googleapis.com/auth/bigquery https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloud-platform.read-only
+
+      // -----------------------------------
+
+
+      // <!-- call google.accounts.oauth2.initTokenClient FIRST, and then gapi -->
+      function oauth2_gapi() {
+
+        // ------------------
+        
+        // Try 0: Using a token
+        
+        // https://developers.google.com/identity/oauth2/web/reference/js-reference
+        // [object Object]
+
+        // client_id =Required. The client ID for your application. You can find this value in the API Console.
+
+        // callback =	Required. The JavaScript function that handles returned token response.
+        
+        // scope = Required. A space-delimited list of scopes that identify the resources that your application could access on the user's behalf. These values inform the consent screen that Google displays to the user.
+
+        // Try 1: call gapi inside google.accounts.oauth2.initTokenClient, outputting
+        // DOES NOT WORK : no output
+        /*
+        var client = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID, 
+          scope: SCOPES, 
+          callback: (resp) => {
+            document.getElementById("outData0").innerHTML = resp;
+            if (resp && resp.access_token) {
+              gapi.client.setApiKey(API_KEY);
+              gapi.client.load('madeup_name', 'v1', call_library);
+            }
+          }
+        });
+        */
+
+        // ------------------
+
+        // Prints
+        // document.getElementById("outData0").innerHTML = tokenClient;
+
+        // ------------------
+
+        // Try 1: DOES NOT WORK - no response, Try to have the function return the callback
+        // google.accounts.oauth2.initTokenClient({client_id: CLIENT_ID, scope: SCOPES, callback: handles_tokenResponse}).then(res => res.json()).then(res => {document.getElementById("outData0").innerHTML = JSON.parse(JSON.stringify(res));})
+
+        // ------------------
+
+        // Try 2: call gapi inside google.accounts.oauth2.initTokenClient, exact code from google
+        // DOES NOT WORK : no output
+        /*
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: 'https://www.googleapis.com/auth/calendar.readonly',
+          callback: (tokenResponse) => {
+            document.getElementById("outData0").innerHTML = 'here';
+            if (tokenResponse && tokenResponse.access_token) {
+              gapi.client.setApiKey(API_KEY);
+              gapi.client.load('calendar', 'v3', listUpcomingEvents);
+            }
+          },
+        });
+        */
+
+        // ------------------
+
+        // Try 3: call gapi inside google.accounts.oauth2.initTokenClient, async for the callback
+        // DOES NOT WORK : no output
+        /*
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: 'https://www.googleapis.com/auth/calendar.readonly',
+          callback: async (tokenResponse) => {
+            document.getElementById("outData0").innerHTML = 'here';
+            if (tokenResponse && tokenResponse.access_token) {
+              await gapi.client.setApiKey(API_KEY);
+              // OR
+              // await gapi.client.setApiKey(tokenResponse.access_token);
+              await gapi.client.load('calendar', 'v3', listUpcomingEvents);
+            }
+          },
+        });
+        */
+
+
+        // ------------------
+
+        // Next test: can try returning the promise of the
+        /*
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: 'https://www.googleapis.com/auth/calendar.readonly',
+          callback: async (tokenResponse) => {
+            document.getElementById("outData0").innerHTML = 'here';
+            if (tokenResponse && tokenResponse.access_token) {
+              await gapi.client.setApiKey(API_KEY);
+              // OR
+              // await gapi.client.setApiKey(tokenResponse.access_token);
+              await gapi.client.load('calendar', 'v3', listUpcomingEvents);
+            }
+          },
+        }).then(function(response) {document.getElementById("outData1").innerHTML = response;}, 
+                    function(reason) {document.getElementById("outData1").innerHTML = reason.result.error.message;}
+                    );
+        */
+
+        // ------------------
+
+        // DOES NOT WORK : no output 
+        gapi.auth2.getAuthInstance().signIn().then(() => {
+          // User is now signed in and you have an access token
+          // Perform API requests
+
+          document.getElementById("outData0").innerHTML = "sign-in worked";
+
+        });
+
+        // ------------------
+
+      }
+
+
+
+      // -----------------------------------
+      function gapi_oauth2() {
+        
+        // DOES NOT WORK with https://apis.google.com/js/api.js
+        // gapi.load('auth2', initializeGapiClient_way1);
+
+        // WORK with https://apis.google.com/js/api.js
+        // gapi.load('client', initializeGapiClient_way1);
+        
+        // WORK with https://apis.google.com/js/api.js
+        gapi.load('client:auth2', initializeGapiClient_way1);
+
+
+        /*
+        gapi.load('client', () => {
+          gapi.client.init({
+            apiKey: API_KEY, 
+            discoveryDocs: [DISCOVERY_DOC], 
+            client_id: CLIENT_ID, 
+            fetch_basic_profile: true,
+            //scopes: SCOPES,
+          }).then(function() {
+          //}).then(() => {
+            // Perform API requests
+
+            //gapi.auth2.getAuthInstance().signIn().then(() => {
+              // User is now signed in and you have an access token
+              // Perform API requests
+              // ---------------------------------
+              // Perform API requests
+              // prints here
+              document.getElementById("outData0").innerHTML = "here";
+              // OR
+              // outData1 prints [object Object]
+              // document.getElementById("outData1").innerHTML = gapi.client.calendar.events.list({'calendarId': 'primary', 'showDeleted': true, 'singleEvents': true, 'maxResults': 10});
+              // OR
+              // outData1 is undefined
+              // gapi.client.calendar.events.list({'calendarId': 'primary', 'showDeleted': true, 'singleEvents': true, 'maxResults': 10});
+              // OR
+              // outData1 is undefined
+              return gapi.client.bigquery.jobs.query({
+                          "projectId": "observations-of-data-scientist", 
+                          "prettyPrint": true, 
+                          "quotaUser": 256, 
+                          "query": "INSERT INTO payAccess.payAccess_table (accesskey, paid) VALUES('username3', true)", "location": "europe-west9", 
+                          "useLegacySql": false});
+              // ---------------------------------
+            //});
+          })
+          //.then(response => {document.getElementById("outData1").innerHTML = response;});
+          .then(function(response) {document.getElementById("outData1").innerHTML = response;});
+        }
+        );
+        */
+
+
+        /*
+        gapi.load('client', function() {
+          gapi.client.init({
+            apiKey: API_KEY,
+            clientId: CLIENT_ID,
+            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/YOUR_API_NAME/v1/rest'],
+            scopes: SCOPES,
+          }).then(function() {
+            // Handle successful initialization
+            // You can now make authenticated requests using the gapi.client library
+          }, function(error) {
+            // Handle error
+          });
+        });
+        */
+
+      }
+
+      async function initializeGapiClient_way1(){
+        
+        // Base case: WORKS - API_KEY sign-in only
+        /*
+        await gapi.client.init({
+                  apiKey: API_KEY, 
+                  discoveryDocs: [DISCOVERY_DOC], 
+                  client_id: CLIENT_ID, 
+                  fetch_basic_profile: true}).then(function() {
+                    document.getElementById("outData1").innerHTML = "initialized_client: print in initializeGapiClient_way1";
+                  });
+        */
+
+        // Next test that worked: printing the tokenClient
+        // [object Object]
+        /*
+        await gapi.client.init({
+                  apiKey: API_KEY, 
+                  discoveryDocs: [DISCOVERY_DOC], 
+                  client_id: CLIENT_ID, 
+                  fetch_basic_profile: true}).then(function() {
+                    var tokenClient = google.accounts.oauth2.initTokenClient({client_id: CLIENT_ID, scope: SCOPES, callback: ''});
+                    document.getElementById("outData1").innerHTML = tokenClient;
+                    tokenClient.requestAccessToken({prompt: 'consent'}); // Launches
+                  });
+        */
+        
+
+        // Next test: I thought that if tokenClient works with callback='', lets try assigning the callback to a function
+        // Called gapi.client.init FIRST, and then clicked on a button to call gapi_oauth2_buttonhandle
+        // DOES NOT WORK : no output and no pop-up
+        // In the example, 
+        // they make the tokenClient variable
+        // ask user to push a button
+        // it creates a tokenClient.callback where they use the API
+        // then they launch the sign-in window
+        /*
+        await gapi.client.init({
+                  apiKey: API_KEY, 
+                  discoveryDocs: [DISCOVERY_DOC], 
+                  client_id: CLIENT_ID, 
+                  fetch_basic_profile: true}).then(function() {
+                    var tokenClient = google.accounts.oauth2.initTokenClient({client_id: CLIENT_ID, scope: SCOPES, callback: ''});
+                    document.getElementById("outData1").innerHTML = tokenClient;
+                  });
+        */
+
+        // Because there was no pop-up, I need to test both the pop-up and callback function in isolation to find what causes the problem.
+
+        // Next test: testing tokenClient.requestAccessToken({prompt: 'consent'}) to see if it works in isolation
+        // It prints the tokenClient AND tokenClient.requestAccessToken({prompt: 'consent'}); launches the pop-up -> WORKS
+        // Error 400: redirect_uri_mismatch
+        // I think that the redirect_uri is wrong because I do not have a function that handles the callback
+        // The callback is getting a response from the API library! - it does not work if you just print in the callback
+        /*
+        await gapi.client.init({
+                  apiKey: API_KEY, 
+                  discoveryDocs: [DISCOVERY_DOC], 
+                  client_id: CLIENT_ID, 
+                  fetch_basic_profile: true}).then(function() {
+                    var tokenClient = google.accounts.oauth2.initTokenClient({client_id: CLIENT_ID, scope: SCOPES, callback: ''});
+                    document.getElementById("outData1").innerHTML = tokenClient;
+                    tokenClient.requestAccessToken({prompt: 'consent'}); 
+                  });
+        */
+
+        // Next test: testing the contents of listUpcomingEvents to see if it works in isolation -> WORKS
+        
+        // I also discovered that I can input SCOPES into gapi.client.init is I use the property "scopes" instead of "scope". Then I also realised that I could type anything I wanted in the place of "scope" and it worked too, so not including scope because it is not reliable.
+
+        // WORKS -> it says that I still need OAuth2 authentication for BigQuery and that calendar events are Not Found
+        /*
+        await gapi.client.init({
+                  apiKey: API_KEY, 
+                  discoveryDocs: [DISCOVERY_DOC], 
+                  client_id: CLIENT_ID, 
+                  fetch_basic_profile: true,
+                  // scope: SCOPES, // it does not output, the code breaks. So apparently it means that it does something
+                  // test: true,  // it outputs, but test is not a parameter. I could type anything and think that it is working because it does not give an error message.
+                  }).then(function() {
+
+                    
+                    // Calendar
+                    // Not Found
+                    // return gapi.client.calendar.events.list({'calendarId': 'primary', 'showDeleted': true, 'singleEvents': true, 'maxResults': 10});})
+                    
+
+                    // OR
+                    
+                    // Bigquery
+                    // API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication
+                    return gapi.client.bigquery.jobs.query({
+                        "projectId": "observations-of-data-scientist", 
+                        "prettyPrint": true, 
+                        "quotaUser": 256, 
+                        "query": "INSERT INTO payAccess.payAccess_table (accesskey, paid) VALUES('username3', true)", "location": "europe-west9", 
+                        "useLegacySql": false});})
+                    
+            
+                    .then(function(response) {document.getElementById("outData1").innerHTML = response;}, function(reason) {document.getElementById("outData1").innerHTML = reason.result.error.message;
+                  });
+        */
+
+        // I have events on my calendar, and it say Not Found. 
+        // Idea 0: Maybe try a different function
+        // *** Idea 1: Since the promise returned, it works in terms of our current needs of getting a response. So move on to understanding why the tokenClient.callback does not work
+
+
+
+        // Next test: Test to see if I can return external functions inside of gapi.client.init --> it can not return the output of an external function, it always outputs undefined as the return (but it outputs the correct output inside the external function)
+        // call the function listUpcomingEvents to see if it works in isolation -> WORKS A BIT
+        // The print out in listUpcomingEvents says Not Found
+        // But, the print out in gapi.client.init says undefined 
+        // So it receives something, but can not output the correct value -- Which means that it WORKS A BIT (the code is more correct because it gives a response)
+        /*
+        await gapi.client.init({
+                  apiKey: API_KEY, 
+                  discoveryDocs: [DISCOVERY_DOC], 
+                  client_id: CLIENT_ID, 
+                  fetch_basic_profile: true}).then(function() {
+                    var out = listUpcomingEvents(); // prints "Not Found" inside listUpcomingEvents, but says undefined in outData1
+                    // OR
+                    // var out = call_library(); // prints "ran ok" inside call_library, but says undefined in outData1
+                    document.getElementById("outData1").innerHTML = out; // this says [object Object] because it is the promise
+                    return out;
+                    })
+                    // this second part is the callback, that can not be outputted correctly: says undefined
+                    .then(function(response) {document.getElementById("outData1").innerHTML = JSON.stringify(response);}, function(reason) {document.getElementById("outData1").innerHTML = reason.result.error.message;
+                  });
+        */
+
+        // What did I learn? I need to call the API inside gapi.client.init.
+        // So, gapi_oauth2_buttonhandle will not work because it is outside of gapi.client.init.
+        // This also implies that the callback needs to be inside of gapi.client.init too
+
+        
+
+
+        // Next test: call the google.accounts.oauth2.initTokenClient inside of gapi.client.init, and use the callback inside of gapi.client.init
+        // No output for outData0, Returns undefined for outData1
+        /*
+        await gapi.client.init({
+                  apiKey: API_KEY, 
+                  discoveryDocs: [DISCOVERY_DOC], 
+                  client_id: CLIENT_ID, 
+                  fetch_basic_profile: true}).then(function() {
+                    var tokenClient = google.accounts.oauth2.initTokenClient({
+                      client_id: CLIENT_ID, 
+                      scope: SCOPES, 
+                      callback: async (tokenResponse) => {
+                        document.getElementById("outData0").innerHTML = 'here';
+                        tokenClient.requestAccessToken({prompt: 'consent'});
+                        var out = await gapi.client.calendar.events.list({
+                          'calendarId': 'primary', 
+                          'showDeleted': true, 
+                          'singleEvents': true, 
+                          'maxResults': 10});
+                        document.getElementById("outData0").innerHTML = out;
+                        return out;
+                      }
+                    });
+                   }).then(function(response) {document.getElementById("outData1").innerHTML = response;}, 
+                    function(reason) {document.getElementById("outData1").innerHTML = reason.result.error.message;}
+                    );
+        */
+
+        // There is problem with the sequential order for which I am calling things
+
+        // Initial attempt to use the callback inside of gapi.client.init 
+        // DOES NOT WORK : no output 
+        /*
+        await gapi.client.init({apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC], client_id: CLIENT_ID, fetch_basic_profile: true}).then(function() {var tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID, 
+          scope: SCOPES, 
+          callback: async (tokenResponse) => { tokenClient.requestAccessToken({prompt: 'consent'}); document.getElementById("outData1").innerHTML = tokenResponse.access_token; }
+          }); 
+        });
+        */
+
+        // Next test: break down each call in sequential order
+        // Things that I need to sequentially order:
+        // 1. returning the tokenResponse - then what do you do with it?? How do you give the tokenResponse to the API?? In REST API we give it to the POST request
+        // 2. opening the pop-up window
+        // 3. calling the API
+        // 4. returning the response of the API
+        /*
+        await gapi.client.init({
+                  apiKey: API_KEY, 
+                  discoveryDocs: [DISCOVERY_DOC], 
+                  client_id: CLIENT_ID, 
+                  fetch_basic_profile: true}).then(function() {
+                    var tokenClient = google.accounts.oauth2.initTokenClient({
+                      client_id: CLIENT_ID, 
+                      scope: SCOPES, 
+                      callback: async (tokenResponse) => {
+                        return tokenResponse.access_token;
+                      }
+                    });
+                   }).then(function(response) {
+
+                      // 1. returning the tokenResponse
+                      var oauth2_token = response;
+                      document.getElementById("outData1").innerHTML = oauth2_token;
+
+                      // 2. opening the pop-up window
+                      tokenClient.requestAccessToken({prompt: 'consent'});
+
+                      // 3. calling the API
+                      // 4. returning the response of the API
+                      var out = gapi.client.calendar.events.list({
+                          'calendarId': 'primary', 
+                          'showDeleted': true, 
+                          'singleEvents': true, 
+                          'maxResults': 10});
+                      document.getElementById("outData0").innerHTML = out;
+                    }, 
+                    function(reason) {document.getElementById("outData1").innerHTML = reason.result.error.message;}
+                    );
+        */
+
+
+        // Problem: the pop-up appears
+        // 0. It says re-direct error
+        //    - I went to https://console.cloud.google.com/ - Under  Authorized JavaScript origins I put https://script.google.com - Under Authorized redirect URIs I put https://script.google.com
+        // 
+        // 1. But if I type in the url below the page opens
+        
+        // https://accounts.google.com/o/oauth2/auth?client_id=982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com&response_type=token&redirect_uri=https://script.google.com&scope=https://www.googleapis.com/auth/bigquery https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloud-platform.read-only     
+        
+        // 2. url obtained with pop-up
+        // https://accounts.google.com/signin/oauth/error/v2?authError=ChVyZWRpcmVjdF91cmlfbWlzbWF0Y2gS3QEKVm91cyBuZSBwb3V2ZXogcGFzIHZvdXMgY29ubmVjdGVyIMOgIGNldHRlIGFwcGxpLCBjYXIgZWxsZSBuZSByZXNwZWN0ZSBwYXMgbGUgcsOoZ2xlbWVudCBPQXV0aMKgMi4wIGRlIEdvb2dsZS4KClNpIHZvdXMgw6p0ZXMgbGUgZMOpdmVsb3BwZXVyIGRlIGwnYXBwbGksIGVucmVnaXN0cmV6IGwnb3JpZ2luZSBKYXZhU2NyaXB0IGRhbnMgbGEgY29uc29sZSBHb29nbGXCoENsb3VkLgogIBp1aHR0cHM6Ly9kZXZlbG9wZXJzLmdvb2dsZS5jb20vaWRlbnRpdHkvcHJvdG9jb2xzL29hdXRoMi9qYXZhc2NyaXB0LWltcGxpY2l0LWZsb3cjYXV0aG9yaXphdGlvbi1lcnJvcnMtb3JpZ2luLW1pc21hdGNoIJADKlwKBm9yaWdpbhJSaHR0cHM6Ly9uLXIycGJ0cnNxc2YyZ3g0NmVlc3E3cWR4Z2ppZ2VzdXZocmRoNXdhcS0wbHUtc2NyaXB0Lmdvb2dsZXVzZXJjb250ZW50LmNvbTLZAggBEt0BClZvdXMgbmUgcG91dmV6IHBhcyB2b3VzIGNvbm5lY3RlciDDoCBjZXR0ZSBhcHBsaSwgY2FyIGVsbGUgbmUgcmVzcGVjdGUgcGFzIGxlIHLDqGdsZW1lbnQgT0F1dGjCoDIuMCBkZSBHb29nbGUuCgpTaSB2b3VzIMOqdGVzIGxlIGTDqXZlbG9wcGV1ciBkZSBsJ2FwcGxpLCBlbnJlZ2lzdHJleiBsJ29yaWdpbmUgSmF2YVNjcmlwdCBkYW5zIGxhIGNvbnNvbGUgR29vZ2xlwqBDbG91ZC4KICAadWh0dHBzOi8vZGV2ZWxvcGVycy5nb29nbGUuY29tL2lkZW50aXR5L3Byb3RvY29scy9vYXV0aDIvamF2YXNjcmlwdC1pbXBsaWNpdC1mbG93I2F1dGhvcml6YXRpb24tZXJyb3JzLW9yaWdpbi1taXNtYXRjaA%3D%3D&client_id=982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com
+
+        // `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=${responseType}`;
+        //
+        // This means that google.accounts.oauth2.initTokenClient does not create the correct url in the popup window check the url that google.accounts.oauth2.initTokenClient creates
+
+        // There is no way to check what url tat google.accounts.oauth2.initTokenClient creates, the function tokenClient.createAuthUrl() does not work
+        
+        await gapi.client.init({
+                  apiKey: API_KEY, 
+                  discoveryDocs: [DISCOVERY_DOC], 
+                  client_id: CLIENT_ID, 
+                  fetch_basic_profile: true,
+                  redirect_uri: REDIRECT_URI,
+                  // scope: SCOPES, // it does not output, the code breaks. So apparently it means that it does something
+                  // test: true,  // it outputs, but test is not a parameter. I could type anything and think that it is working because it does not give an error message.
+                  })
+                  .then(function() {
+                    // GCP authentification: way 0: client-side authentification (DOES NOT WORK) - no output
+                    // gapi.auth2.getAuthInstance().signIn()}).then(() => {
+                    // gapi.auth2.getAuthInstance().signIn()}).then(function() {
+
+                    // OR
+
+                    // GCP authentification: way 0: server-side authentification - WORKS
+                    // Error 400: redirect_uri_mismatch
+                    // var tokenClient = google.accounts.oauth2.initTokenClient({client_id: CLIENT_ID, scope: SCOPES, callback: ''}); 
+                    // document.getElementById("outData0").innerHTML = tokenClient; 
+                    // tokenClient.requestAccessToken({prompt: 'consent'});
+                    // return tokenClient;
+
+                    // OR
+                    
+                    // GCP authentification: way 1: server-side authentification - WORKS
+                    // Error 400: redirect_uri_mismatch
+
+                    // google.accounts.oauth2.initCodeClient : This function is used to create an OAuth2 client that can request an authorization code. An authorization code is an intermediate step in the OAuth2 flow. You typically use this function when you want to authenticate a user and obtain their consent to access their data. The generated authorization code can then be exchanged for an access token.
+                    
+
+                    // google.accounts.oauth2.initTokenClient : This function is used to create an OAuth2 client that can request an access token directly. An access token is a credential that can be used to access protected resources. You typically use this function when you already have an authorization code or a refresh token, and you want to obtain an access token to make authenticated API requests
+                    
+                    var tokenClient = google.accounts.oauth2.initTokenClient({
+                      client_id: CLIENT_ID, 
+                      // scope Required. A space-delimited list of scopes that identify the resources
+                      scope: SCOPES,
+                      // callback Required. The JavaScript function that handles returned token response. 
+                      callback: async (tokenResponse) => {
+                        // a. when the pop-up is running it waits for the user to finish, to get the token
+                        const accessToken = await tokenClient.getAccessToken();
+                        // OR
+                        // const accessToken = tokenResponse.access_token;
+
+                        // b. input the token into gapi.client
+                        gapi.client.setToken({access_token: accessToken,});
+                        },
+                      // prompt: '', 'none', 'consent', 'select_account'
+                      prompt: "consent",
+                    });
+
+                    // [object Object]
+                    document.getElementById("outData0").innerHTML = tokenClient;
+
+                    // No output
+                    // document.getElementById("outData0").innerHTML = tokenClient.redirect_uri;
+
+                    // No output
+                    // const authorizationUrl = tokenClient.createAuthUrl();
+                    // document.getElementById("outData0").innerHTML = authorizationUrl;
+
+
+                    // 1. open the pop-up window, wait the the user to respond, then input token into gapi.client
+                    // Prompt the user to select a Google Account and ask for consent to share their data when establishing a new session.
+
+                    // Try using a different prompt mode. Instead of using 'consent', you can try using 'select_account' or 'none' and see if that resolves the issue.
+                    tokenClient.requestAccessToken({prompt: 'consent'});
+                    // OR
+                    // Skip display of account chooser and consent dialog for an existing session.
+                    // tokenClient.requestAccessToken({prompt: ''});
+
+                    // Verify that token was captured
+                    // document.getElementById("outData0").innerHTML = gapi.client.getToken(); // null if not captured
+                    
+
+                    return tokenClient;
+                    
+                    });   // end of then(function() {
+                  
+
+                  // Since the url does not work, there was an idea to try google.accounts.oauth2.initCodeClient, but this further showed that google.accounts.oauth2.initTokenClient is for a server set-up. 
+
+                  // I was hoping that I could use google.accounts.oauth2.initTokenClient for a client-side setup because it is only method that opens the pop-up window.
+
+                  // https://developers.google.com/identity/oauth2/web/guides/use-code-model#popup-mode
+
+
+
+                  // Next test: try to use the client-side gapi.auth2 to open a pop-up window
+                  /*
+                  await gapi.client.init({
+                    apiKey: API_KEY, 
+                    discoveryDocs: [DISCOVERY_DOC], 
+                    client_id: CLIENT_ID, 
+                    fetch_basic_profile: true,
+                    redirect_uri: REDIRECT_URI,
+                    // scope: SCOPES, // it does not output, the code breaks. So apparently it means that it does something
+                    // test: true,  // it outputs, but test is not a parameter. I could type anything and think that it is working because it does not give an error message.
+                    })
+                    .then(function() {
+                      auth_call();
+                    });   // end of then(function() {
+
+
+                      // GCP authentification: way 0: client-side authentification (DOES NOT WORK) - no output
+                     // await gapi.auth2.getAuthInstance().signIn()}).then(() => {
+                      
+                      // OR
+
+                      // way 1: different type promise call, but same as way 0
+                      // gapi.auth2.getAuthInstance().signIn()}).then(function() {
+
+                      // Print a confirmation
+                      //document.getElementById("outData0").innerHTML = 'here';
+                     // });
+                     */
+                  
+                  
+
+
+
+
+                  /*
+                    })
+                    .then(function() {
+                    
+                    // 2. opening the pop-up window
+                    // tokenClient.requestAccessToken({prompt: 'consent'});
+                    
+                    // }).then(() => {
+
+                    // User is now signed in and you have an access token
+
+                    // ---------------------------------
+                    // Perform API requests
+                    // 3. calling the API
+                    // ---------------------------------
+                    // Calendar
+                    // Not Found
+                    // return gapi.client.calendar.events.list({'calendarId': 'primary', 'showDeleted': true, 'singleEvents': true, 'maxResults': 10});
+                  
+                    // OR
+                    
+                    // Bigquery
+                    // API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication
+                    return gapi.client.bigquery.jobs.query({
+                        "projectId": "observations-of-data-scientist", 
+                        "prettyPrint": true, 
+                        "quotaUser": 256, 
+                        "query": "INSERT INTO payAccess.payAccess_table (accesskey, paid) VALUES('username3', true)", "location": "europe-west9", 
+                        "useLegacySql": false});
+                    // ---------------------------------
+                  
+                  }).then(function(response) {
+                    // 4. returning the response of the API
+                    document.getElementById("outData1").innerHTML = response;
+                    }, function(reason) {document.getElementById("outData1").innerHTML = reason.result.error.message;
+                  });
+          */
+
+      }
+
+      async function auth_call(){
+        await gapi.auth2.getAuthInstance().signIn().then(res => res).then(res => {document.getElementById("outData0").innerHTML = 'here';})
+      }
+
+
+
+      // -----------------------------------
+
+      // DOES NOT WORK : no output and no pop-up
+      // Identifying which part has the error
+      // We know that listUpcomingEvents and tokenClient.requestAccessToken({prompt: 'consent'}); work in isolation
+      function gapi_oauth2_buttonhandle() {
+        tokenClient.callback = async (resp) => {
+          // is it the promise response of listUpcomingEvents? so we comment out the if statement
+          //if (resp.error !== undefined) {
+          //  throw (resp);
+          //}
+          await listUpcomingEvents();
+        };
+
+        // Or is the problem from gapi.client.getToken() ? Comment out if statement
+        // if (gapi.client.getToken() === null) {
+          // Prompt the user to select a Google Account and ask for consent to share their data
+          // when establishing a new session.
+          tokenClient.requestAccessToken({prompt: 'consent'});
+        // } else {
+          // Skip display of account chooser and consent dialog for an existing session.
+        //   tokenClient.requestAccessToken({prompt: ''});
+        // }
+      }
+
+
+
+
+      // -----------------------------------
+      // Extra Functions
+      // -----------------------------------
+      function listUpcomingEvents() {
+          return gapi.client.calendar.events.list({'calendarId': 'primary', 'showDeleted': true, 'singleEvents': true, 'maxResults': 10}).then(function(response) {document.getElementById("outData0").innerHTML = response;}, function(reason) {document.getElementById("outData0").innerHTML = reason.result.error.message;});
+       }
+
+
+      function call_library() {
+        try {
+
+          // await gapi.client.load('plus', 'v1', function() {return gapi.client.bigquery.jobs.query({"projectId": "observations-of-data-scientist", "prettyPrint": true, "quotaUser": 256, "query": "INSERT INTO payAccess.payAccess_table (accesskey, paid) VALUES('username2', true)", "location": "europe-west9", "useLegacySql": false});}).then(function(response) {document.getElementById("outData1").innerHTML = response;}, function(reason) {document.getElementById("outData1").innerHTML = reason.result.error.message;});
+
+          // gapi.client.bigquery.jobs.query({"projectId": "observations-of-data-scientist", "prettyPrint": true, "quotaUser": 256, "query": "INSERT INTO payAccess.payAccess_table (accesskey, paid) VALUES('username2', true)", "location": "europe-west9", "useLegacySql": false});
+
+          document.getElementById("outData0").innerHTML = "ran ok";
+
+        } catch (error){
+          document.getElementById("outData0").innerHTML = error;
+        }
+        
+      }
+
+      // -----------------------------------
+
+    </script>
+    
+    
+  </body>
+</html>
+
+
+------------------------------------------------------------------------------------------------------
+index_auth2
+------------------------------------------------------------------------------------------------------
+<!DOCTYPE html>
+<html>
+  <head></head>
+  <body>
+    <!-- HTML -->
+    <!-- Redirect page after PayPal payment is received -->
+    <h1 style='text-align: center; margin-bottom: -35px;'>Data Science Observations in a Chaotic World</h1>
+    <br><br>
+    <p style='text-align: center; margin-bottom: -35px;'>Congratulations on purchasing the remaining Observations 5-21! You are on your way to having a more observant and responsible career and life! 🎉</p>
+
+    <br><br>
+
+    Please create a non-personalized accesskey/username, such that the webapp knows that you paid. The webapp will store your non-personalized accesskey in a Google Cloud BigQuery database. When you enter your non-personalized accesskey in the webapp, the webapp will search the BigQuery database and give you permission to use the webapp. No personal payment information is stored.
+    
+    <br><br>
+
+    <label style="text-align: center;">Create a non-personalized accesskey to unlock Observations 5-21:</label><input id="payAccess_key" type="text" value="" placeholder="Create a unique non-personalized accesskey" rows="1" cols="50" style='text-align: center; width: 400px;'>
+    
+    <br><br>
+
+    <button id="init_way0" onclick="init_way0()" style='text-align: left;'>init_way0</button>
+    <br><br>
+    <textarea id="outData0" style='text-align: left;' rows="4" cols="50" placeholder="outData0"></textarea>
+
+    <br><br>
+    <textarea id="outData1" style='text-align: left;' rows="4" cols="50" placeholder="outData1"></textarea>
+
+    <br><br>
+
+    <!-- --------------------------------------------------- -->
+
+    <!-- JAVASCRIPT -->
+
+    <!-- Initializing libraries for way 0 -->
+
+    <!-- if initializing is NOT CONNECTED to a button push -->
+    <!-- For gapi.auth2 library -->
+    <script src="https://apis.google.com/js/platform.js?onload=init_way0" async defer></script> 
+    <!-- <script async defer src="https://apis.google.com/js/platform.js" onload="init_way0()"></script>-->
+
+    <!-- For gapi.client library -->
+    <!-- <script async defer src="https://apis.google.com/js/api.js" onload="init_way0()"></script> -->
+    
+    <!-- if initializing is NOT CONNECTED to a button push -->
+    <script async defer src="https://apis.google.com/js/api.js"></script>
+
+    
+    <script>
+      // -----------------------------------
+
+      // Google Calendar
+      // https://developers.google.com/calendar/api/v3/reference/events/list
+      // const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
+
+      // const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+
+      // GET https://www.googleapis.com/calendar/v3/calendars/calendarId/events
+
+      // -----------------------------------
+
+      // BigQuery
+      const DISCOVERY_DOC = "https://bigquery.googleapis.com/discovery/v1/apis/bigquery/v2/rest";
+
+      const SCOPES = "https://www.googleapis.com/auth/bigquery https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloud-platform.read-only";
+      
+      // POST https://bigquery.googleapis.com/bigquery/v2/projects/"+projectId+"/queries
+      
+      // -----------------------------------
+      
+      const API_KEY = "AIzaSyDw0as0jiC_L9W9jqbOJgH7BbO5m0QWaAQ";
+      const CLIENT_ID = "982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com";
+
+      // -----------------------------------
+
+      // Way 0: use auth2: using gapi.auth2.init
+
+      // Step 0: authorize the project
+      function init_way0(){
+        gapi.load('auth2', initializeGapiClient_way0);
+
+        // Try 0: prints here
+        document.getElementById("outData1").innerHTML = "initialized: print in init_way0";
+
+        // Try 2: no output, can not print 
+        // document.getElementById("outData00").innerHTML = initialized;
+      }
+
+      async function initializeGapiClient_way0(){
+        
+        // Summary: it can not print in the callback and it can not return anything
+
+        // Try 0: WORKS
+        // await gapi.auth2.init({client_id: CLIENT_ID})
+        
+        // -------------------
+
+        // Try 0: can not print in the callback - prints in outData1, but not outData0
+        /*
+        await gapi.auth2.init({
+          apiKey: API_KEY, 
+          discoveryDocs: [DISCOVERY_DOC], 
+          client_id: CLIENT_ID,
+          fetch_basic_profile: true,
+          scopes: SCOPES,
+          // test: true   // I can make up any property and it runs the same
+        }).then(() => {
+          // User is now signed in and you have an access token
+          // Perform API requests
+          document.getElementById("outData0").innerHTML = "here";
+        });
+        */
+
+        // -------------------
+
+        // Try 0: can not print in the callback - prints in outData1, but not outData0
+        /*
+        await gapi.auth2.init({
+                  apiKey: API_KEY, 
+                  discoveryDocs: [DISCOVERY_DOC], 
+                  client_id: CLIENT_ID, 
+                  fetch_basic_profile: true})
+                  .then(function() {
+                    document.getElementById("outData0").innerHTML = "here";
+                  });
+        */
+
+        // -------------------
+
+        // Try 0: can not print in the callback - prints in outData1, but not outData0
+        await gapi.auth2.init({
+                  apiKey: API_KEY, 
+                  discoveryDocs: [DISCOVERY_DOC], 
+                  client_id: CLIENT_ID, 
+                  fetch_basic_profile: true})
+                  .then(res => res)
+                  .then(res => {document.getElementById("outData0").innerHTML = "here";});
+
+        // -------------------
+
+        // await gapi.auth2.getAuthInstance().signIn().then(() => {
+          // User is now signed in and you have an access token
+          // Perform API requests
+        //   document.getElementById("outData0").innerHTML = "sign-in worked";
+        // });
+        
+        // -------------------
+
+        // DOES NOT WORK : no output
+        // The gapi.auth2 library can not return a promise or callback
+        // await gapi.auth2.init({client_id: CLIENT_ID}).then(function() {document.getElementById("outData0").innerHTML = "initialized_client: print in initializeGapiClient_way1";});
+
+
+        // DOES NOT WORK : no output
+        // The gapi.auth2 library can not return a promise or callback
+        /*
+        await gapi.auth2.init({
+          apiKey: API_KEY, 
+          discoveryDocs: [DISCOVERY_DOC], 
+          client_id: CLIENT_ID,
+          fetch_basic_profile: true
+        }).then(function() {document.getElementById("outData0").innerHTML = "initialized_client: print in initializeGapiClient_way1";});
+        */
+        
+
+        /*
+        await gapi.auth2.init({
+          apiKey: API_KEY, 
+          discoveryDocs: [DISCOVERY_DOC], 
+          client_id: CLIENT_ID, 
+          fetch_basic_profile: true,
+          //scope: SCOPES,
+        }).then(function() {
+                    
+                    // Calendar
+                    
+                    // Not Found
+                    return gapi.client.calendar.events.list({
+                    'calendarId': 'primary', 
+                    'showDeleted': true, 
+                    'singleEvents': true, 
+                    'maxResults': 10});})
+                    
+                    // OR
+                    // Bigquery
+                    // API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication
+                    return gapi.client.bigquery.jobs.query({
+                        "projectId": "observations-of-data-scientist", 
+                        "prettyPrint": true, 
+                        "quotaUser": 256, 
+                        "query": "INSERT INTO payAccess.payAccess_table (accesskey, paid) VALUES('username3', true)", "location": "europe-west9", 
+                        "useLegacySql": false})
+            })
+                    .then(function(response) {document.getElementById("outData0").innerHTML = response;}, function(reason) {document.getElementById("outData0").innerHTML = reason.result.error.message;
+                  });
+          */
+
+        // Try 1: return promise and print in callback -  no output, can not print
+        // await gapi.auth2.init({client_id: CLIENT_ID}).then(res => res).then(res => {document.getElementById("outData0").innerHTML = "initialized_client: print in initializeGapiClient_way1";});
+
+        
+
+        // Try 0, 1, 2: does not print here
+        // document.getElementById("outData00").innerHTML = "initialized: print in initializeGapiClient_way0";
+      }
+
+      // -----------------------------------
+
+    </script>
+    
+    
+  </body>
+</html>
+
+
+------------------------------------------------------------------------------------------------------
+rest_api
+------------------------------------------------------------------------------------------------------
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    
+    <!-- HTML -->
+
+    <button id="step0_submit_form_way0" onclick="step0_submit_form_way0()" style='text-align: left;'>step0_submit_form_way0</button>
+
+    <br><br>
+
+    <textarea id="outData0" style='text-align: left;' rows="4" cols="50" placeholder="outData0"></textarea>
+
+    <br><br>
+    <!-- ---------------------------------- -->
+
+    <button id="step0_submit_form_way1" onclick="step0_submit_form_way1()" style='text-align: left;'>step0_submit_form_way1</button>
+
+    <br><br>
+
+    <textarea id="outData01" style='text-align: left;' rows="4" cols="50" placeholder="outData01"></textarea>
+
+    <br><br>
+    <!-- ---------------------------------- -->
+
+    <input id="payAccess_key" type="text" value="" placeholder="In progress, will be operational New Years Day." rows="1" cols="50" style='text-align: center; width: 400px;'>
+
+    <br><br>
+
+    <!-- ---------------------------------- -->
+
+    <button id="read_response_data" onclick="read_response_data()" style='text-align: left;'>read_response_data</button>
+
+    <br><br>
+
+    <textarea id="outData1" style='text-align: left;' rows="4" cols="50" placeholder="outData1"></textarea>
+
+    <!-- ---------------------------------- -->
+
+    <br><br>
+
+    <button id="fetch_post2bigquery_way0" onclick="fetch_post2bigquery_way0()" style='text-align: left;'>fetch_post2bigquery_way0</button>
+
+    <br><br>
+
+    <textarea id="outData2" style='text-align: left;' rows="4" cols="50" placeholder="outData2"></textarea>
+
+    <br><br>
+
+    <!-- ---------------------------------- -->
+
+    <form action="https://accounts.google.com/o/oauth2/v2/auth" method="POST" id="id_of_form" onsubmit="return checkForm(this)">
+    <div>
+      <input type="text" name="client_id" id="client_id" value="982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com" style="display:none;">
+    </div>
+    <div>
+      <input type="text" name="response_type" id="response_type" value='token' style="display:none;">
+    </div>
+    <div>
+      <input type="text" name="redirect_uri" id="redirect_uri" value="https://script.google.com/macros/s/AKfycbxlPnt0dpuOhLOcydEJ0GdWSPD2BFf3W3BvMTLY6pJP/dev" style="display:none;">
+    </div>
+    <div>
+      <!-- <input type="text" name="scope" id="scope" value="https://www.googleapis.com/auth/bigquery" style="display:none;"> -->
+      <input type="text" name="scope" id="scope" value="https://www.googleapis.com/auth/bigquery https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloud-platform.read-only" style="display:none;">
+    </div>
+    <div>
+      <input type="text" name="include_granted_scopes" id="include_granted_scopes" value='true' style="display:none;">
+    </div>
+    <div>
+      <input type="text" name="state" id="state" value='pass-through' style="display:none;">
+    </div>
+    <button name="submit_button" value='submit_button' id="Submit" style='text-align: left;'>Submit</button>
+    </form>
+
+    <!-- ---------------------------------- -->
+
+
+    <!-- JAVASCRIPT -->
+
+    <script>
+      
+      // -------------------
+      // EventListener - Start monitoring events as soon as script starts
+      // -------------------
+      // it seems like it is always running, so I can just start it running at the start of script
+
+      // Nothing is saved
+      window.addEventListener("locationchange", function(){ 
+        
+        localStorage.setItem('test0', "locationchange_eventlistener");
+
+        // does not save anything
+        google.script.run.withSuccessHandler(function(result){ localStorage.setItem('get_top_url', result); }).getTopUrl(); 
+      });
+
+      // -------------------
+
+      // window.top.addEventListener("locationchange", function(){ localStorage.setItem('get_window_location_href', window.location.href); google.script.run.withSuccessHandler(function(result){ localStorage.setItem('get_top_url', result); }).getTopUrl(); });
+
+      // Response: You can't sign in to this app because it doesn't comply with Google's OAuth 2.0 policy for keeping apps secure. You can let the app developer know that this app doesn't comply with one or more Google validation rules.
+
+      // https://developers.google.com/identity/protocols/oauth2/web-server#uri-validation
+      
+      // -------------------
+
+      // -------------------
+      // *** It runs all JavaScript not in a function before and AFTER it is Refreshed!!! So if I want something AFTER the page is refreshed, just put it in the JavaScript without a function. ***
+      // -------------------
+      // const iframe = document.querySelector('input[name="access_token"]');
+
+      // var accessToken = document.getElementById("id_of_form").elements["access_token"];
+      // localStorage.setItem('accessToken', accessToken);
+      
+      // Response: undefined
+      //  So this means that accessToken does not exist, so print all the form data to localStorage
+      
+      // -------------------
+
+      // Display the key/value pairs
+      // var formObject = document.getElementById("id_of_form");
+      // for (const [key, val] of Object.entries(formObject)) {
+        // localStorage.setItem(key, val);
+        // OR
+      //   localStorage.setItem(key.name, formObject.elements[key].value);
+      // }
+
+      // does not print out individual values
+
+      // -------------------
+
+      // Read from the submitted form
+      // Display the key/value pairs on the form before and AFTER the GET/POST
+      var formObject = document.getElementById("id_of_form");
+      var form_elements = formObject.elements;
+
+      for (var i=0; i<form_elements.length; i++){
+        var key_value_pair = form_elements[i]; 
+
+        localStorage.setItem(key_value_pair.name, key_value_pair.value)
+      }
+
+      // WORKS, but says undefined for the response item
+      // name:"", value:"", valueActor: [undefined undefined]
+      
+      // -------------------
+
+      // Try to print all the other possible commands to localStorage to decide what to do
+      
+      // localStorage.setItem("location_hash_substring0", location.hash.substring)
+      // location_hash_substring0:"function substring() {[native code]}"
+      
+      // localStorage.setItem("location_hash_substring1", location.hash.substring(1))
+      // return nothing
+
+      localStorage.setItem("window_location_href", window.location.href)
+      // Prints sandbox url: https://n-r2pbtrsqsf2gx46eesq7qdxgjigesuvhrdh5waq-0lu-script.googleusercontent.com/userCodeAppPanel
+
+      // -------------------
+
+      // ****** Works for a non-sandbox environment ******
+      // Get the current URL
+      // const currentUrl = window.location.href;
+
+      // Parse the URL to extract the parameters
+      // const urlParams = new URLSearchParams(currentUrl);
+
+      // Get the access token from the URL parameters
+      // const accessToken = urlParams.get('access_token');
+
+      // localStorage.setItem("accessToken", accessToken)
+
+      // -------------------
+
+
+
+      // -------------------
+
+      /*
+      iframe.addEventListener('load', function() {
+        const iframeUrl = iframe.contentWindow.location.href;
+
+        // Extract the access token from the iframe URL
+        const accessToken = extractAccessTokenFromUrl(iframeUrl);
+
+        // Save values to localStorage
+        localStorage.setItem('iframeUrl', iframeUrl);
+        localStorage.setItem('accessToken', accessToken);
+      });
+      */
+
+
+      // -------------------
+
+      var SCOPES = 'https://www.googleapis.com/auth/bigquery https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloud-platform.read-only';
+
+      const API_KEY = "";
+      var CLIENT_ID = '';
+
+      var REDIRECT_URI = 'https://script.google.com/macros/s/AKfycbxlPnt0dpuOhLOcydEJ0GdWSPD2BFf3W3BvMTLY6pJP/dev';
+      // OR
+      // var REDIRECT_URI = 'https://script.google.com';
+
+
+      // -------------------
+      // Current solution for running the REST API BIGQUERY function
+      // -------------------
+      // 0. Copy-paste the ACCESS_TOKEN from the browser 
+
+      // https://script.google.com/macros/s/AKfycbxlPnt0dpuOhLOcydEJ0GdWSPD2BFf3W3BvMTLY6pJP/dev#state=pass-through&access_token=ya29.a0AfB_byAE9nmOjYrzQ13P3mz2K54JRfYnkzhgMi0sMGVEAoQ7LtPgw8F_Vo9ZynzhgEMcRvDh7Gm1efbmaMDu2U1V8NGZ8R7rToZ1YSKeu84lib3a5QkDBSP_KzuVIn8N10CJpeE_kmP6DeNqzNsl2Qjq3RlDBMieA8QaCgYKATwSARASFQHGX2Mi2NwsSZuGbQG1EKN-1-OP4w0170&token_type=Bearer&expires_in=3599&scope=https://www.googleapis.com/auth/bigquery%20https://www.googleapis.com/auth/cloud-platform%20https://www.googleapis.com/auth/cloud-platform.read-only
+
+      var ACCESS_TOKEN = "";
+
+      // -------------------
+
+
+
+
+      // ----------------------------------------
+      // STEP 0: call the Google OAuth2 server using GET
+      // ----------------------------------------
+      function step0_submit_form_way0() {
+
+        // https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow
+
+        // Google's OAuth 2.0 endpoint for requesting an access token
+        var URL = 'https://accounts.google.com/o/oauth2/v2/auth';
+
+        // var returnedurl = window.location.href; 
+        // document.getElementById("outData0").innerHTML = returnedurl;
+        // https://n-r2pbtrsqsf2gx46eesq7qdxgjigesuvhrdh5waq-0lu-script.googleusercontent.com/userCodeAppPanel
+
+        // ----------------------------------------
+        // Create a form using javascript
+        // ----------------------------------------
+        // Create <form> element to submit parameters to OAuth 2.0 endpoint.
+        var form = document.createElement('form');
+
+        form.setAttribute('method', 'GET'); // Original code
+        //form.setAttribute('method', 'POST'); // tried because it said the parameters will be returned to the body, and I could read them from the body, 
+
+        form.setAttribute('action', URL);
+
+        // form.setAttribute('target', "my-iframe");
+
+        // Parameters to pass to OAuth 2.0 endpoint.
+        var params = {'client_id': CLIENT_ID, 'response_type': 'token', 'redirect_uri': REDIRECT_URI, 'scope': SCOPES, 'include_granted_scopes': 'true', 'state': 'pass-through'};
+
+        // Add form parameters as hidden input values.
+        for (var p in params) {
+          var input = document.createElement('input');
+
+          // input.setAttribute('type', 'visible');  // hidden
+          // input.setAttribute('name', p);
+          // input.setAttribute('value', params[p]);
+          // OR
+          // input.innerHTML = '<input type="visible" name='+p+' value='+params[p]+'>';
+          // OR
+          input.innerHTML = '<input style="display:none;" name='+p+' value='+params[p]+'>';
+          
+          form.appendChild(input);
+        }
+        // Add form to page and submit it to open the OAuth 2.0 endpoint.
+        document.body.appendChild(form);
+        // ----------------------------------------
+
+        form.submit();
+
+      }
+
+      // -------------------
+
+      function step0_submit_form_createAform_way1(){
+
+        // ----------------------------------------
+        // Create a form using javascript
+        // ----------------------------------------
+        // Create <form> element to submit parameters to OAuth 2.0 endpoint.
+        var form = document.createElement('form');
+
+        // Parameters to pass to OAuth 2.0 endpoint.
+        var params = {'client_id': CLIENT_ID, 'response_type': 'token', 'redirect_uri': REDIRECT_URI, 'scope': SCOPES, 'include_granted_scopes': 'true', 'state': 'pass-through'};
+
+        // Add form parameters as hidden input values.
+        for (var p in params) {
+          var input = document.createElement('input');
+          input.innerHTML = '<input type="visible" name='+p+' value='+params[p]+'>';
+          form.appendChild(input);
+        }
+        // Add form to page and submit it to open the OAuth 2.0 endpoint.
+        document.body.appendChild(form);
+        // ----------------------------------------
+
+        return form
+      }
+
+      // -------------------
+
+      async function step0_submit_form_way1(){
+        
+        // Submit the form to a GET or POST request
+
+        // -----------------------------------
+        
+        // POST
+
+        // Try 0 : 
+        // Google's OAuth 2.0 endpoint for requesting an access token
+        // This URL is used because we have the other information  (client_id, response_type, redirect_uri, scope) in the form
+
+        // var URL = 'https://accounts.google.com/o/oauth2/v2/auth';
+
+        // var headers = {"Content-Type": "application/json"};
+
+        // var options = {method : 'POST', headers: headers, body : formData};
+        
+        // Response
+        // TypeError: NetworkError when attempting to fetch resource. Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://accounts.google.com/o/oauth2/v2/auth. (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). Status code: 405.
+
+        // Submits the form using JavaScript: can not do redirects, so one gets a CORS error
+        // try {
+          // Output: Print text part to a text area
+          //await fetch(URL, options).then(res => res).then(res => {document.getElementById("outData01").innerHTML = JSON.stringify(res);})
+
+        //   await fetch(URL).then(res => res).then(res => {document.getElementById("outData01").innerHTML = 'here';})
+
+        // } catch (error) {
+        //   document.getElementById("outData01").innerHTML = error;
+        // }
+
+        // -----------------------------------
+
+        // Try 1: Add Access-Control-Allow-Origin to the header like the error message said
+        
+        // var URL = 'https://accounts.google.com/o/oauth2/v2/auth';
+
+        // var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + API_KEY, 'Access-Control-Allow-Origin': '*'};
+        
+        // var options = {method : 'POST', headers: headers, body : formData};
+        
+        // Response
+        // TypeError: NetworkError when attempting to fetch resource. Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://accounts.google.com/o/oauth2/v2/auth. (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). Status code: 405.
+
+        // Submits the form using JavaScript: can not do redirects, so one gets a CORS error
+        // try {
+          // Output: Print text part to a text area
+          //await fetch(URL, options).then(res => res).then(res => {document.getElementById("outData01").innerHTML = JSON.stringify(res);})
+
+        //   await fetch(URL).then(res => res).then(res => {document.getElementById("outData01").innerHTML = 'here';})
+
+        // } catch (error) {
+        //   document.getElementById("outData01").innerHTML = error;
+        // }
+
+        // -----------------------------------
+
+        // Try 2: Add Access-Control-Allow-Origin to the header in a different way
+
+        // var URL = 'https://accounts.google.com/o/oauth2/v2/auth';
+
+        // var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + API_KEY, 'Access-Control-Allow-Origin': URL};
+
+        // var options = {method : 'POST', headers: headers, body : formData};
+        
+        // Response
+        // TypeError: NetworkError when attempting to fetch resource. Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://accounts.google.com/o/oauth2/v2/auth. (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). Status code: 405.
+
+        // Submits the form using JavaScript: can not do redirects, so one gets a CORS error
+        // try {
+          // Output: Print text part to a text area
+          //await fetch(URL, options).then(res => res).then(res => {document.getElementById("outData01").innerHTML = JSON.stringify(res);})
+
+        //   await fetch(URL).then(res => res).then(res => {document.getElementById("outData01").innerHTML = 'here';})
+
+        // } catch (error) {
+        //   document.getElementById("outData01").innerHTML = error;
+        // }
+
+        // -----------------------------------
+
+        // Try 3: Use a different URL, using POST
+
+        // This URL is the url to use to receive oauth2 approval
+
+        // var URL = 'https://accounts.google.com/o/oauth2/auth?client_id=982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com&response_type=token&redirect_uri=https://script.google.com&scope=https://www.googleapis.com/auth/bigquery https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloud-platform.read-only';
+
+        // var headers = {"Content-Type": "application/json"};
+
+        // var options = {method : 'POST', headers: headers, body : formData};
+
+        // Response
+        // (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). Status code: 405
+
+        // Submits the form using JavaScript: can not do redirects, so one gets a CORS error
+        // try {
+          // Output: Print text part to a text area
+          //await fetch(URL, options).then(res => res).then(res => {document.getElementById("outData01").innerHTML = JSON.stringify(res);})
+
+        //   await fetch(URL).then(res => res).then(res => {document.getElementById("outData01").innerHTML = 'here';})
+
+        // } catch (error) {
+        //   document.getElementById("outData01").innerHTML = error;
+        // }
+
+        // -----------------------------------
+
+        // Try 3: Use a different URL, using GET
+
+        // This URL is the url to use to receive oauth2 approval
+
+        // var URL = 'https://accounts.google.com/o/oauth2/auth?client_id=982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com&response_type=token&redirect_uri=https://script.google.com&scope=https://www.googleapis.com/auth/bigquery https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloud-platform.read-only';
+
+        // var headers = {"Content-Type": "application/json"};
+
+        // var options = {method : 'GET', headers: headers, mode: 'cors'};
+
+        // Response
+        // Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://accounts.google.com/o/oauth2/auth?client_id=982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com&response_type=token&redirect_uri=https://script.google.com&scope=https://www.googleapis.com/auth/bigquery%20https://www.googleapis.com/auth/cloud-platform%20https://www.googleapis.com/auth/cloud-platform.read-only. (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). Status code: 405.
+
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSMissingAllowOrigin?utm_source=devtools&utm_medium=firefox-cors-errors&utm_campaign=default
+
+
+        // One interpretation of what this means: Google blocks OAuth from all websites using GET or POST, so one needs to put the domain of their website
+
+        // Submits the form using JavaScript: can not do redirects, so one gets a CORS error
+        // try {
+          // Output: Print text part to a text area
+          //await fetch(URL, options).then(res => res).then(res => {document.getElementById("outData01").innerHTML = JSON.stringify(res);})
+
+        //   await fetch(URL).then(res => res).then(res => {document.getElementById("outData01").innerHTML = 'here';})
+
+        // } catch (error) {
+        //   document.getElementById("outData01").innerHTML = error;
+        // }
+
+        // -----------------------------------
+
+        // Try 4: Use a different URL, using GET
+
+        // This URL is the url to use to receive oauth2 approval
+
+        // var URL = 'https://accounts.google.com/o/oauth2/auth?client_id=982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com&response_type=token&redirect_uri=https://script.google.com&scope=https://www.googleapis.com/auth/bigquery https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloud-platform.read-only';
+
+        // https://accounts.google.com/o/oauth2/auth?client_id=<client_id>&redirect_uri=<redirect_uri>&response_type=code&scope=https://www.googleapis.com/auth/drive.readonly
+
+        // var SITE_ORIGINS = "https://script.google.com";
+
+        // var headers = {"Content-Type": "application/json"};
+
+        // Looks like if you have a server, you specify this
+        // var headers = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type"};
+        //, "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS"
+
+        // var options = {method : 'GET', headers: headers, mode: 'cors'};
+
+        // Response
+        // Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://accounts.google.com/o/oauth2/auth?client_id=982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com&response_type=token&redirect_uri=https://script.google.com&scope=https://www.googleapis.com/auth/bigquery%20https://www.googleapis.com/auth/cloud-platform%20https://www.googleapis.com/auth/cloud-platform.read-only. (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). Status code: 405.
+
+        // Submits the form using JavaScript: can not do redirects, so one gets a CORS error
+        // try {
+          // Output: Print text part to a text area
+          //await fetch(URL, options).then(res => res).then(res => {document.getElementById("outData01").innerHTML = JSON.stringify(res);})
+
+        //   await fetch(URL).then(res => res).then(res => {document.getElementById("outData01").innerHTML = 'here';})
+
+        // } catch (error) {
+        //   document.getElementById("outData01").innerHTML = error;
+        // }
+
+        // -----------------------------------
+
+        // Try 5: Use the GET url of a successful request
+        // var URL = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com&response_type=token&redirect_uri=https://script.google.com/macros/s/AKfycbxlPnt0dpuOhLOcydEJ0GdWSPD2BFf3W3BvMTLY6pJP/dev&scope=https://www.googleapis.com/auth/bigquery&include_granted_scopes=true&state=pass-through';
+
+        // var headers = {"Content-Type": "application/json"};
+
+        // var options = {method : 'GET', headers: headers, mode: 'cors'};
+
+        // Submits the form using JavaScript: can not do redirects, so one gets a CORS error
+        // try {
+          // Output: Print text part to a text area
+          //await fetch(URL, options).then(res => res).then(res => {document.getElementById("outData01").innerHTML = JSON.stringify(res);})
+
+        //   await fetch(URL).then(res => res).then(res => {document.getElementById("outData01").innerHTML = 'here';})
+
+        // } catch (error) {
+        //   document.getElementById("outData01").innerHTML = error;
+        // }
+
+        // -----------------------------------
+
+        // Try 6: Use form to send to GET request
+
+        // Get the form information
+        // var form_made_with_javascript = step0_submit_form_createAform_way1();
+        
+        // const searchParams = new URLSearchParams(form_made_with_javascript);
+
+        // Uncaught (in promise) TypeError: URLSearchParams constructor: Element of sequence<sequence<USVString>> branch of (sequence<sequence<USVString>> or record<USVString, USVString> or USVString) can't be converted to a sequence.
+
+        // Error
+        // document.getElementById("outData01").innerHTML = searchParams;
+
+        // document.getElementById("outData01").innerHTML = searchParams;
+
+        // Response - DOES NOT WORK
+        // Does not work
+
+        // Submits the form using JavaScript: can not do redirects, so one gets a CORS error
+        // try {
+          // Output: Print text part to a text area
+          //await fetch(URL, options).then(res => res).then(res => {document.getElementById("outData01").innerHTML = JSON.stringify(res);})
+
+        //   await fetch(URL).then(res => res).then(res => {document.getElementById("outData01").innerHTML = 'here';})
+
+        // } catch (error) {
+        //   document.getElementById("outData01").innerHTML = error;
+        // }
+
+        // -----------------------------------
+
+        // Try 7: Convert form data to query string
+
+        // Send parameters instead of a form
+        // const paramsString = "q=URLUtils.searchParams&client_id=982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com&response_type=token&redirect_uri=https://script.google.com/macros/s/AKfycbxlPnt0dpuOhLOcydEJ0GdWSPD2BFf3W3BvMTLY6pJP/dev&scope=https://www.googleapis.com/auth/bigquery&include_granted_scopes=true&state=pass-through";
+        
+        // const searchParams = new URLSearchParams(paramsString);
+        
+        // document.getElementById("outData01").innerHTML = searchParams;
+
+        // var URL = 'https://accounts.google.com/o/oauth2/v2/auth?'+searchParams;
+
+        // Response - DOES NOT WORK
+        // https://accounts.google.com/o/oauth2/v2/auth?q=URLUtils.searchParams&client_id=982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com&response_type=token&redirect_uri=https%3A%2F%2Fscript.google.com%2Fmacros%2Fs%2FAKfycbxlPnt0dpuOhLOcydEJ0GdWSPD2BFf3W3BvMTLY6pJP%2Fdev&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fbigquery&include_granted_scopes=true&state=pass-through
+        // 
+        // Scheme: https
+        // Host: 	accounts.google.com
+        // Filename: 	/o/oauth2/v2/auth
+
+        // Submits the form using JavaScript: can not do redirects, so one gets a CORS error
+        // try {
+          // Output: Print text part to a text area
+          //await fetch(URL, options).then(res => res).then(res => {document.getElementById("outData01").innerHTML = JSON.stringify(res);})
+
+        //   await fetch(URL).then(res => res).then(res => {document.getElementById("outData01").innerHTML = 'here';})
+
+        // } catch (error) {
+        //   document.getElementById("outData01").innerHTML = error;
+        // }
+
+        // -----------------------------------
+
+        // Try 8:
+
+        // const formData = new FormData(document.querySelector('#id_of_form'));
+
+        // Convert form data to query string
+        // const searchParams = new URLSearchParams(formData);
+
+        // document.getElementById("outData01").innerHTML = searchParams;
+
+        // var URL = 'https://accounts.google.com/o/oauth2/v2/auth?'+searchParams;
+
+        // Submits the form using JavaScript: can not do redirects, so one gets a CORS error
+        // try {
+          // Output: Print text part to a text area
+          //await fetch(URL, options).then(res => res).then(res => {document.getElementById("outData01").innerHTML = JSON.stringify(res);})
+
+        //   await fetch(URL).then(res => res).then(res => {document.getElementById("outData01").innerHTML = 'here';})
+
+        // } catch (error) {
+        //   document.getElementById("outData01").innerHTML = error;
+        // }
+
+        // -----------------------------------
+
+        // Try 9: call the form and assign the response to a function
+        // Submits the form using the browser: can do redirects
+        const formData = new FormData(document.querySelector('#id_of_form'));
+        formData.onsubmit = checkForm;
+
+
+
+        // -----------------------------------
+        
+        
+        
+        
+
+      }
+
+
+
+      // -------------------
+
+      function checkForm(thisForm){
+
+        // Works
+        // document.getElementById("outData01").innerHTML = "here";
+
+        // -----------------------------------
+
+        // var form = document.forms[0];
+        // document.getElementById("outData01").innerHTML = form;
+
+        // Response: HTML Format
+
+        // -----------------------------------
+        
+        // IF <form action="https://accounts.google.com/o/oauth2/v2/auth" method="POST" id="id_of_form" onsubmit="return checkForm()">
+        // var client_id = document.getElementById("id_of_form").elements["client_id"].value;
+        // localStorage.setItem('client_id', client_id);
+
+        // WORKS!!
+
+        // -----------------------------------
+
+        // IF <form action="https://accounts.google.com/o/oauth2/v2/auth" method="POST" id="id_of_form" onsubmit="return checkForm(this)">
+        // localStorage.setItem("anotherway_client_id", thisForm.client_id.value)
+
+        // WORKS:
+
+        // -----------------------------------
+
+        // document.querySelector('#id_of_form').elements.namedItem('client_id')
+
+        // -----------------------------------
+        
+        // try calling the eventlistener upon submitting the form
+        // window.addEventListener("locationchange", function(){ 
+        
+        //   localStorage.setItem('test0', "locationchange_eventlistener");
+
+          // does not save anything
+        //   google.script.run.withSuccessHandler(function(result){ localStorage.setItem('get_top_url', result); }).getTopUrl(); 
+        // });
+
+        // DOES NOT WORK
+
+        // -----------------------------------
+
+
+      }
+
+      // -------------------
+
+
+
+      // ----------------------------------------
+      // STEP 1: Decode the server response 
+      // ----------------------------------------
+
+      // *** Problem: does not save anything to localStorage ***
+      // var fragmentString = 
+
+      // Parse query string to see if page request is coming from OAuth 2.0 server.
+      // var params = {};
+      // var regex = /([^&=]+)=([^&]*)/g, m;
+      // while (m = regex.exec(fragmentString)) {
+      //   params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+      // }
+
+      // if (Object.keys(params).length > 0) {
+      //   localStorage.setItem('oauth2-test-params', JSON.stringify(params) );
+      //   if (params['state'] && params['state'] == 'try_sample_request') {
+          
+          // Get access_token from page
+      //     var params = JSON.parse(localStorage.getItem('oauth2-test-params'));
+      //     var ACCESS_TOKEN = params['access_token'];
+
+          // Call a method
+          // trySampleRequest();
+          // fetch_post2bigquery();
+      //   }
+      // }
+
+      // -------------------
+
+      // Try to save a simple string to localStorage - WORKS
+      // localStorage.setItem('test_key', 'test_value');
+
+      // -------------------
+
+      // Nothing is in the parameters fragmentString, so nothing gets saved to localStorage
+      // localStorage.setItem('fragmentString', fragmentString);
+
+      // -------------------
+     
+
+
+      // ----------------------------------------
+      // STEP 2: Read response data from body of page
+      // ----------------------------------------
+      function read_response_data(){
+        
+        // If a POST request is performed : read params from the body
+        // Result: there is no variable params defined after the page refreshes
+
+        // need to figure out how to read the body - this outputs the html of the body - it is not what I want
+        // document.getElementById("outData1").innerHTML =  document.body.innerHTML;
+
+        // I need to read parmas in the body
+        // Uncaught ReferenceError: params is not defined
+        // document.getElementById("outData0").innerHTML =  params;
+
+        // -------------------
+
+        // -------------------
+        // If a GET request is performed: get URL from the refreshed page
+        // -------------------
+
+        // Way 0: location.hash.substring(1)
+        // No response
+        // document.getElementById("outData1").innerHTML = window.location.hash.substring(1);
+
+        // -------------------
+        
+        // Way 1: location.href.match
+        //var match = window.location.href.match(/^[^#]+#([^?]*)\??(.*)/);
+        //var hashpath = match[1];
+        //var parameters = match[2];
+
+        // Returns the url of the sandboxFrame
+        // I always obtain the incorrect URL: https://n-r2pbtrsqsf2gx46eesq7qdxgjigesuvhrdh5waq-0lu-script.googleusercontent.com/userCodeAppPanel
+        //document.getElementById("outData1").innerHTML = window.location.href;
+
+        // -------------------
+
+        // https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy#cross-origin_script_api_access
+        // Uncaught DOMException: Permission denied to get property "href" on cross-origin object
+        // document.getElementById("outData1").innerHTML = window.top.location.href;
+
+        // -------------------
+
+        // *** MOST SUCCESS - getting the original url ***
+        // Returns the original url before the form submission
+        // Result: https://script.google.com/macros/s/AKfycbxlPnt0dpuOhLOcydEJ0GdWSPD2BFf3W3BvMTLY6pJP/dev
+        google.script.run.withSuccessHandler(function(result){document.getElementById("outData1").innerHTML = result;}).getTopUrl();
+
+        
+        // https://script.google.com/macros/s/AKfycbxlPnt0dpuOhLOcydEJ0GdWSPD2BFf3W3BvMTLY6pJP/dev#state=pass-through&access_token=ya29.a0AfB_byAdn7aH9Biod4jB6FqOBTcB9faQ5ALpbybiVD-Kfy4fsIeDeMrgQf7DCp1TwE0WvQJIibRA0jkG7mtzXHLzcJdNJatwqe7Nb7OXlh_eNB1CPhqjCS3qOY72HbuUtteYYyW1yP6q2E0rONdD3rjdKynqjqZj9pUaCgYKAewSARASFQHGX2MiHLTCmjiWQwYIf7_VYAffTQ0170&token_type=Bearer&expires_in=3599&scope=https://www.googleapis.com/auth/bigquery%20https://www.googleapis.com/auth/cloud-platform%20https://www.googleapis.com/auth/cloud-platform.read-only
+
+
+        // -------------------
+
+        // Returns nothing
+        // google.script.run.withSuccessHandler(function(result){document.getElementById("outData1").innerHTML = result;}).get_url();
+
+        // -------------------
+
+        // google.script.run.withSuccessHandler(function(result){document.getElementById("outData1").innerHTML = result;}).get_parameters_from_event();
+
+        // -------------------
+        
+        // Save GET/POST response from URL and save to localStorage
+        // document.getElementById("outData1").innerHTML =  localStorage.getItem('test_key');
+
+      }
+
+
+
+      
+      
+      
+
+      // ----------------------------------------
+      // STEP 3: Fetch POST to BigQuery table - WORKS
+      // ----------------------------------------
+      async function fetch_post2bigquery_way0(){
+
+        var payAccess_key = document.getElementById("payAccess_key").value;
+        // document.getElementById("outData1").innerHTML = payAccess_key;
+        //var payAccess_key = "username4";
+
+        var projectId = "observations-of-data-scientist";
+
+        var location = "europe-west9";
+
+        var url = "https://bigquery.googleapis.com/bigquery/v2/projects/"+projectId+"/queries";
+
+        // -----------------------------------
+        
+        var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + ACCESS_TOKEN};
+
+        var data = {
+                  "query": "INSERT INTO payAccess.payAccess_table (accesskey, paid) VALUES('"+payAccess_key+"', true)", 
+                  "location": location, 
+                  "useLegacySql": false
+                  };
+
+        var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+
+        // {"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"accesskey","type":"STRING"},{"name":"paid","type":"BOOLEAN"}]},"jobReference":{"projectId":"observations-of-data-scientist","jobId":"job_Pp7-j7SSw-VQF2Nqc1qBhoTzna9Y","location":"europe-west9"},"totalBytesProcessed":"0","jobComplete":true,"cacheHit":false,"numDmlAffectedRows":"1","dmlStats":{"insertedRowCount":"1"},"queryId":"job_Pp7-j7SSw-VQF2Nqc1qBhoTzna9Y"}
+
+        // -----------------------------------
+
+        try {
+          // Output: Print text part to a text area
+          await fetch(url, options).then(res => res.json()).then(res => {document.getElementById("outData2").innerHTML = JSON.stringify(res);})
+
+        } catch (error) {
+          document.getElementById("outData2").innerHTML = error;
+        }
+
+      }
+      // -----------------------------------
+
+
+
+
+
+      </script>
+
+
+  </body>
+</html>
+
+
+
+------------------------------------------------------------------------------------------------------
+rest_api2
+------------------------------------------------------------------------------------------------------
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    
+    <!-- HTML -->
+
+    <!-- <button id="step0_call_url_in_window_way0" onclick="step0_call_url_in_window_way0()" style='text-align: left;'>step0_call_url_in_window_way0</button> -->
+
+    <!-- <button id="step0_call_url_in_window_way1" onclick="step0_call_url_in_window_way1()" style='text-align: left;'>step0_call_url_in_window_way1</button> -->
+
+    <button id="sequential_events" onclick="sequential_events()" style='text-align: left;'>sequential_events</button>
+
+    <br><br>
+
+    <textarea id="outData0" style='text-align: left;' rows="4" cols="50" placeholder="outData0"></textarea>
+
+    <br><br>
+
+    <textarea id="outData1" style='text-align: left;' rows="4" cols="50" placeholder="outData1"></textarea>
+
+    <br><br>
+
+    <button id="get_url_on_newpage" onclick="get_url_on_newpage()" style='text-align: left;'>get_url_on_newpage</button>
+
+    <br><br>
+
+    <textarea id="outData2" style='text-align: left;' rows="4" cols="50" placeholder="outData2"></textarea>
+
+    <br><br>
+
+    <button id="fetch_post2bigquery" onclick="fetch_post2bigquery()" style='text-align: left;'>fetch_post2bigquery</button>
+
+    <br><br>
+
+    <textarea id="outData3" style='text-align: left;' rows="4" cols="50" placeholder="outData3"></textarea>
+
+    <br><br>
+
+
+    <!-- JAVASCRIPT -->
+    <script>
+      
+      // -------------------
+      // Start monitoring events as soon as script starts
+      // -------------------
+      // it seems like it is always running, so I can just start it running at the start of script
+      // window.addEventListener("locationchange", function(){ document.getElementById("outData1").innerHTML = window.location.href; });
+
+      // -------------------
+
+      var SCOPES = 'https://www.googleapis.com/auth/bigquery https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloud-platform.read-only';
+
+      var CLIENT_ID = '982455389157-9o2j34k1qff8cc1apqbec9so842istai.apps.googleusercontent.com';
+
+      var REDIRECT_URI = 'https://script.google.com/macros/s/AKfycbxlPnt0dpuOhLOcydEJ0GdWSPD2BFf3W3BvMTLY6pJP/dev';
+      // OR
+      // var REDIRECT_URI = 'https://script.google.com';
+
+      var CLIENT_SECRET = "";  // for trading in the authorization_code for the access_token
+
+      // -------------------
+
+
+      function get_url_on_newpage(){
+        var fragmentString = location.hash.substring(1);
+        document.getElementById("outData0").innerHTML = fragmentString;
+
+        // Parse query string to see if page request is coming from OAuth 2.0 server.
+        var params = {};
+        var regex = /([^&=]+)=([^&]*)/g, m;
+        while (m = regex.exec(fragmentString)) {
+          params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+        }
+
+        if (Object.keys(params).length > 0) {
+          localStorage.setItem('oauth2-test-params', JSON.stringify(params) );
+          if (params['state'] && params['state'] == 'try_sample_request') {
+            
+            // Get access_token from page
+            var params = JSON.parse(localStorage.getItem('oauth2-test-params'));
+            var ACCESS_TOKEN = params['access_token'];
+
+            // Call a method
+            // trySampleRequest();
+            fetch_post2bigquery();
+          }
+        }
+      }
+
+      // -------------------
+
+      async function total_process(){
+
+        // callback
+        // await step0_call_url_in_window_way1().then(function () {var returnedurl = window.location.href; document.getElementById("outData0").innerHTML = returnedurl;})
+
+        // promise, then callback
+        // await step0_call_url_in_window_way1().then(res => res).then(res => {setTimeout( function() { var returnedurl = window.location.href; document.getElementById("outData0").innerHTML = returnedurl; }, 3000)})
+        
+        // It waits to send the form
+        // await step0_call_url_in_window_way1()
+        // setTimeout( function() { var returnedurl = window.location.href; document.getElementById("outData0").innerHTML = returnedurl; }, 3000)
+
+        await step0_call_url_in_window_way1();
+      }
+
+      // -------------------
+
+      // Different ways to make function calls in sequence
+
+      // return a promise of function_name, and then return a callback of the promise - you always have an output from function_name (like undefined)
+      // await function_name().then(response => response.json).then(response => { output res or other commands})
+
+      // return a callback of function_name, and do a sequential function call
+      // await function_name().then(response => (do something with response)).then(function() {do other commands without response})
+
+      // return the output of function_name
+      // await function_name().then(function(response) {output response or other commands})
+
+      // call function_name and then run some other commands sequentially
+      // await function_name().then(function() {other commands})
+
+      // await function_name().then(() => {other commands})
+
+      async function sequential_events(){
+
+        try {
+          // await step0_call_url_in_window_way1();
+
+          // DOES NOT WORK: It returns the callback before page/url changes
+          await total_process().then(() => { 
+            
+            // {}
+            google.script.url.getLocation(function(location) {document.getElementById("outData0").innerHTML = JSON.stringify(location.parameters, null, 2)})
+            // OR
+            // google.script.run.withSuccessHandler(function(result){var url = e.parameter.url; document.getElementById("outData0").innerHTML = url;}).get_url();
+            // OR
+            var winRef = window.location.href; 
+            // The steps are:
+          // [0] the initial url is the deployment URL, [1] the URL changes to something else (https://n-r2pbtrsqsf2gx46eesq7qdxgjigesuvhrdh5waq-0lu-script.googleusercontent.com/userCodeAppPanel)
+           // document.getElementById("outData0").innerHTML = winRef; 
+          // [2] it contacts OAuth2 with GET
+          // [3] OAuth2 changes the URL to the redirect_uri with the authorization_code  
+          // so calling it here means that I am likely to start monitoring at or after step [1]
+
+          // if the evenlister is always running after it is called like a trigger function running for infinity, shouldn't it catch all paage changes regardless of timing
+
+          // start monitoring for a page change where the url contains #
+          // window.addEventListener("hashchange", function(){ document.getElementById("outData1").innerHTML = window.location.href; });
+
+          // Maybe slowing down the execution of page events makes it run
+          // wait 5000 ms before starting to monitor a url change
+          setTimeout( function() { document.getElementById("outData1").innerHTML = 'here'; }, 500);
+
+          return winRef;
+          })
+          .then(function(winRef) {
+            for (var i=0; i < 500; i++){
+              // https://developers.google.com/apps-script/guides/html/reference/url#locationObject
+              // google.script.url.getLocation(function(location) {document.getElementById("outData1").innerHTML = JSON.stringify(location.parameters, null, 2)})
+              // OR
+              // google.script.run.withSuccessHandler(function(result){var url = e.parameter.url;document.getElementById("outData1").innerHTML = url;}).get_url();
+              // OR
+              document.getElementById("outData1").innerHTML = window.location.href;
+            }
+            // OR
+            // window.addEventListener("hashchange", function(){ })
+          })
+
+          // The final url is 
+          // https://script.google.com/macros/s/AKfycbxlPnt0dpuOhLOcydEJ0GdWSPD2BFf3W3BvMTLY6pJP/dev#state=pass-through&access_token=ya29.a0AfB_byCgmk7gR6Brji_3HFOwLpEGDGgKmQG_kdgT-RkYgYw2mCj2ysLgf5bWBt0tiZuryzSE7qPSJ75iN9w66sA2BkMj6qdY_TWVjty2f3zc8b4bOlac0ffehvnxYzxiS_acySbCNV8rMXGhjUsZWjeBEvayoPU-bQaCgYKAXwSARASFQHGX2MiOnJ28zZx_7iH7fKPfb8Ijg0169&token_type=Bearer&expires_in=3599&scope=https://www.googleapis.com/auth/bigquery
+
+        } catch (error) {
+          document.getElementById("outData1").innerHTML = error;
+        }
+        
+
+      }
+
+
+
+
+      function step0_call_url_in_window_way1(){
+
+        // https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow
+
+        // Google's OAuth 2.0 endpoint for requesting an access token
+        var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
+
+        // var returnedurl = window.location.href; 
+        // document.getElementById("outData0").innerHTML = returnedurl;
+        // https://n-r2pbtrsqsf2gx46eesq7qdxgjigesuvhrdh5waq-0lu-script.googleusercontent.com/userCodeAppPanel
+
+        // Create <form> element to submit parameters to OAuth 2.0 endpoint.
+        var form = document.createElement('form');
+        form.setAttribute('method', 'GET'); // Send as a GET request.
+        form.setAttribute('action', oauth2Endpoint);
+
+        // Parameters to pass to OAuth 2.0 endpoint.
+        var params = {'client_id': CLIENT_ID, 'response_type': 'token', 'redirect_uri': REDIRECT_URI, 'scope': SCOPES, 'include_granted_scopes': 'true', 'state': 'pass-through value'};
+
+        // Add form parameters as hidden input values.
+        for (var p in params) {
+          var input = document.createElement('input');
+
+          // input.setAttribute('type', 'visible');
+          // input.setAttribute('name', p);
+          // input.setAttribute('value', params[p]);
+          // OR
+          input.innerHTML = '<input type="visible" name='+p+' value='+params[p]+'>';
+
+          form.appendChild(input);
+        }
+
+        // Add form to page and submit it to open the OAuth 2.0 endpoint.
+        document.body.appendChild(form);
+        form.submit();
+
+      }
+
+      // -------------------
+
+      // Fetch POST to BigQuery table
+      async function fetch_post2bigquery(){
+
+        // var payAccess_key = document.getElementById("payAccess_key").value;
+        // document.getElementById("outData1").innerHTML = payAccess_key;
+        var payAccess_key = "username3";
+
+        var projectId = "observations-of-data-scientist";
+        // ar datasetId = "payAccess";
+        // var tableId = "payAccess_table";
+
+        // desired columns wanted from the table
+        // var selectedFields = "accesskey,paid";
+        // var view = "BASIC"; 
+        // var alt = "json (default)";
+        // var prettyPrint = true;
+        // var quotaUser = 256;
+
+        var location = "europe-west9";
+
+        //var url = `https://bigquery.googleapis.com/bigquery/v2/projects/${projectId}/queries`;
+        var url = "https://bigquery.googleapis.com/bigquery/v2/projects/"+projectId+"/queries";
+
+        // -----------------------------------
+        
+        var headers = {"Content-Type": "application/json", "Authorization": 'Bearer ' + ACCESS_TOKEN};
+
+        // var data = {"query": "INSERT INTO $dataset_name.$TABLE_NAME (accesskey, paid) VALUES('user2', true);", 'location': location, "useLegacySql": false};
+        var data = {
+                  "query": "INSERT INTO $dataset_name.$TABLE_NAME (accesskey, paid) VALUES("+payAccess_key+", true);", 
+                  "location": location, 
+                  "useLegacySql": false
+                  };
+
+        var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
+
+        // -----------------------------------
+
+        try {
+          // Output: Print text part to a text area
+          await fetch(url, options).then(res => res.json()).then(res => {document.getElementById("outData2").innerHTML = JSON.parse(JSON.stringify(res));})
+
+        } catch (error) {
+          document.getElementById("outData2").innerHTML = error;
+        }
+
+      }
+
+
+
+
+      </script>
+
+
+  </body>
+</html>
+
+
+------------------------------------------------------------------------------------------------------
+rest_api3
+------------------------------------------------------------------------------------------------------
+function doGet(e) {
+
+    var arrayStored = HtmlService.createHtmlOutputFromFile('rest_api3');
+    console.log(arrayStored);
+
+    //localStorage.setItem("accessToken", accessToken)
+    // Store the variable in script properties
+    // PropertiesService.getScriptProperties().setProperty('accessToken', accessToken);
+
+    arrayStored.access_token = e.parameters.access_token;
+
+    return arrayStored
+    // the e argument represents an event parameter that can contain information about any request parameters
+}
+
+
+// Need to do a GET to the Deployed HTML page
+
+async function print_scrape_text(URL) {
+
+  // GET fetch REST API
+  var response = UrlFetchApp.fetch(URL);
+  
+  // Obtain the html page: it is a lot of text so it is necessary to output only certain parts of the HTML page
+  // const pageHTML = response.getContentText();
+  
+  // need to figure out where is access_token in pageHTML
+  
+  console.log(response)
+  
+  return response
+}
+
+
+function get_parameters_from_event(e) {
+  var params = JSON.stringify(e);
+  return ContentService.createTextOutput(params).setMimeType(ContentService.MimeType.JSON);
+}
+
+
+// Just returns the original page url
+function getTopUrl(){
+  return ScriptApp.getService().getUrl();
+}
