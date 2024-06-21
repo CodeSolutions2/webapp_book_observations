@@ -2421,7 +2421,7 @@ the least number of words using a numbered list.`;
         // Make desired part appear
         observation5_unhide();
       } else {
-        payment_popup();
+        payment_instructions();
       }
 
       // Automatically scroll to text
@@ -3586,7 +3586,7 @@ the ${tv_series_or_movie} ${tv_series_or_movie_name} known for? List each attrib
 
     // -----------------------------------
 
-    async payment_popup() {
+    async function payment_instructions() {
       winRef = window.open("https://codesolutions2.github.io/webapp_book_observations/index_payment_instructions.html", "winRef", target="width=1300,height=700");
     }
     
