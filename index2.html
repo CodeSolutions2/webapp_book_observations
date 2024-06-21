@@ -1276,10 +1276,21 @@ But, reliable rules can be oppressive things when proof of experience are lackin
   </style>
 
 
-  <!-- JAVASCRIPT -->
-  <script>
 
-    // -----------------------------------
+
+<!-- Insert library_window_crypto_subtle.js CDN library -->
+<script type="module" src="./index.js"></script>
+      
+
+<script>
+
+// ------------------------------------------------
+  
+window.addEventListener('beforeunload', function() {
+    window.location.href = window.location.href + '?nocache=' + new Date().getTime();
+});
+
+// ------------------------------------------------
 
     function observation0_unhide(){
       document.getElementById("observation0_h2").style.display = "block";
