@@ -2414,9 +2414,15 @@ the least number of words using a numbered list.`;
       // ---------------------
 
       // ---------------------
-      // Make desired part appear
+      // Check for username in the database
       // ---------------------
-      observation5_unhide();
+      let result = await verify_username();
+      if (result == 'Present') {
+        // Make desired part appear
+        observation5_unhide();
+      } else {
+        payment_popup();
+      }
 
       // Automatically scroll to text
       document.getElementById("observation5_part0").scrollIntoView();
@@ -3557,11 +3563,31 @@ the ${tv_series_or_movie} ${tv_series_or_movie_name} known for? List each attrib
 
     // -----------------------------------
 
+    async function verify_username() {
+      var RepoAobj = {};
+    	RepoAobj.repoOwner = "CodeSolutions2";
+    	RepoAobj.filename = "file_database.txt";
+    	RepoAobj.repoA_name = "webapp_book_observations";
+    	RepoAobj.repoB_name = "frontend_backend_message_passing_central_repository_v1";
+    	RepoAobj.input_text = document.getElementById("username").value+"|"+RepoAobj.repoA_name;
+    	RepoAobj.foldername = "webappb";
+      
+    	const classObj = new encrypted_CRUD_file_database(RepoAobj);
+    	const obj = await classObj.search_username_to_file_database();
+
+      return obj.query_search_result;
+    }
 
     // -----------------------------------
 
     async function report_error() {
       winRef = window.open("https://codesolutions2.github.io/webapp_book_observations/index_file_report.html", "winRef", target="width=1300,height=700");
+    }
+
+    // -----------------------------------
+
+    async payment_popup() {
+      winRef = window.open("https://codesolutions2.github.io/webapp_book_observations/index_payment_instructions.html", "winRef", target="width=1300,height=700");
     }
     
     // -----------------------------------
