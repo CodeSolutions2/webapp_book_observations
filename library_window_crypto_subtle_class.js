@@ -328,10 +328,10 @@ export class encrypted_CRUD_file_database {
 					return obj;
 				})
 				.then(async function(obj) {
-					console.log("obj.status:", obj.status);
+					// console.log("obj.status:", obj.status);
 					
 					if ((/^20/g).test(obj.status) == true) {
-						console.log("Match found");
+						// console.log("Match found");
 						if ((/encrypt/g).test(obj.auth) == false && (/decrypt/g).test(obj.auth) == false) {
 							obj.Key_obj = obj.auth;
 						}
