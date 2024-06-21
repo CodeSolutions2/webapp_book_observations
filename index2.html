@@ -20,12 +20,7 @@
     <p style="text-align: center;">Observations 0-4 are free to allow users to understand the content of the webapp book, and thus decide if they would like to purchase the remaining webapp book Observations. If you are intersted in purchasing Observations 5-21, click on any Observation from 5-21 and follow the payment prompts; the remaining 17 Observations cost 8.5 EUR/USD. During the payment process you will be asked to create an accesskey, meaning a non-personalized username to use the webapp. The webapp will store the accesskey in a database and approve your access; none of your personal payment information is stored, only your non-personalized accesskey is stored. Once you have a non-personalized accesskey, enter it in the field below and click on any of the buttons on the webapp.</p>
     <label>Enter and leave the your username to unlock Observations 5-21:</label><input id="username" type="text" value="" placeholder="In progress, will be operational soon." rows="1" cols="50" style='text-align: center; width: 400px;'>
     <br>
-    <label>If you do not have a username, please purchase webapp access via PayPal and add your desired username to the database after payment redirection. If an error occurs, please submit your error using the Report Error button.</label>    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-  <input type="hidden" name="cmd" value="_s-xclick" />
-  <input type="hidden" name="hosted_button_id" value="APTNYYRT2TGQU" />
-  <input type="hidden" name="currency_code" value="EUR" />
-  <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_SM.gif" border="0" name="submit" title="PayPal, votre réflexe sécurité pour payer en ligne." alt="Acheter" />
-</form><button id="report_error" onclick="report_error()">Report Error</button>
+    <label>If you do not have a username, please purchase webapp access via PayPal and add your desired username to the database after payment redirection. If an error occurs, please submit your error using the Report Error button.</label>    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"><input type="hidden" name="cmd" value="_s-xclick" /><input type="hidden" name="hosted_button_id" value="APTNYYRT2TGQU" /><input type="hidden" name="currency_code" value="EUR" /><input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_SM.gif" border="0" name="submit" title="PayPal" alt="Pay Now" /></form><button id="report_error" onclick="report_error()">Report Error</button>
 
     <br><br>
     <!--div is used to center both buttons together on the page-->
