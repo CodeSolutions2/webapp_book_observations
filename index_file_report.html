@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head></head>
+  <body>
+
+<h1>Problem/error reporting page</h1>
+    
+<p style="text-align: center;">If you are having trouble using the Web Application. For example you were not redirected to the book download and username input page after paying via PayPal, please fill out the information below and someone will respond. Thank you for your interest in Data Science Observations in a Chaotic World!</p>
+
+<h3>E-mail Address</h3>
+<input id="email" type="text" value="" placeholder="email" rows="1" cols="50" style='text-align: center; width: 400px;'>
+<br>
+<h3>Short description of problem</h3>
+<input id="problem_description" type="text" value="" placeholder="problem_description" rows="1" cols="50" style='text-align: center; width:800px; height:400px;'>
+
+
+<button id="submit" onclick="submit()" style="display:block">Submit</button>
+
+<br>
+<div id="notification"></div>
+<div id="error"></div>
+<div id="response"></div>
+
+
+<!-- Insert library_window_crypto_subtle.js CDN library -->
+<script type="module" src="./index.js"></script>
+
+<!-- --------------------------------------------------- -->
+    
+<script>
+
+// ------------------------------------------------
+  
+window.addEventListener('beforeunload', function() {
+    window.location.href = window.location.href + '?nocache=' + new Date().getTime();
+});
+
+	
+// ------------------------------------------------
+
+async function submit() {
+	
+	var RepoAobj = {};
+  
+	RepoAobj.repoOwner = "CodeSolutions2";
+	RepoAobj.filename = "file_report.txt";
+	RepoAobj.repoA_name = "webapp_book_observations";
+	RepoAobj.repoB_name = "frontend_backend_message_passing_central_repository_v1";
+	RepoAobj.input_text = document.getElementById("email").value+". "+document.getElementById("problem_description").value+"|"+RepoAobj.repoA_name;
+	RepoAobj.foldername = "webappb";
+  
+	const classObj = new encrypted_CRUD_file_database(RepoAobj);
+	const obj = await classObj.add_username_to_file_database();
+
+	document.getElementById("response").innerHTML = "Your reported problem has been logged. Someone will reply within 5 business days. Thank you.";
+		
+}
+    
+// ------------------------------------------------
+
+
+  
+    
+  </script>
+
+  </body>
+</html>
