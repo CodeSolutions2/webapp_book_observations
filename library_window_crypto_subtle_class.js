@@ -256,7 +256,7 @@ export class encrypted_CRUD_file_database {
 	async decrypt_file_database(obj) {
 
 		console.log('****** Step 1: decrypt the file_database ******');
-		var obj_filedatabase = await GET_text_from_file_wo_auth_GitHub_RESTAPI("file_database.txt", obj.foldername, obj.repoB_name, obj.repoOwner)
+		var obj_filedatabase = await GET_text_from_file_wo_auth_GitHub_RESTAPI(obj.filename, obj.foldername, obj.repoB_name, obj.repoOwner)
 		// console.log('obj_filedatabase: ', obj_filedatabase);
 		
 		obj.encrypted_file_database = atob(obj_filedatabase.text);
