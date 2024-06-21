@@ -362,7 +362,7 @@ export class encrypted_CRUD_file_database {
 	
 	async encrypt_text_RSA(obj) {
 	
-		console.log('Database before encrypting: ', obj.decrypted_file_database);
+		// console.log('Database before encrypting: ', obj.decrypted_file_database);
 	
 		// Convert string to UTF-8 array [non-fixed length array]
 		// So that the text can be stored as a common character/number (that many different systems can understand/decode)
