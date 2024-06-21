@@ -36,7 +36,7 @@ async function search_username() {
 	var RepoAobj = {};
   
 	RepoAobj.repoOwner = "CodeSolutions2";
-	RepoAobj.filename = "cb.txt";
+	RepoAobj.filename = "file_database.txt";
 	RepoAobj.repoA_name = "webapp_book_observations";
 	RepoAobj.repoB_name = "frontend_backend_message_passing_central_repository_v1";
 	RepoAobj.input_text = document.getElementById("username").value+"|"+RepoAobj.repoA_name;
@@ -58,7 +58,7 @@ async function add_username() {
 	var RepoAobj = {};
   
 	RepoAobj.repoOwner = "CodeSolutions2";
-	RepoAobj.filename = "cb.txt";
+	RepoAobj.filename = "file_database.txt";
 	RepoAobj.repoA_name = "webapp_book_observations";
 	RepoAobj.repoB_name = "frontend_backend_message_passing_central_repository_v1";
 	RepoAobj.input_text = document.getElementById("username").value+"|"+RepoAobj.repoA_name;
@@ -80,7 +80,7 @@ async function view_filedatabase() {
 	var RepoAobj = {};
   
 	RepoAobj.repoOwner = "CodeSolutions2";
-	RepoAobj.filename = "cb.txt";
+	RepoAobj.filename = "file_database.txt";
 	RepoAobj.repoA_name = "webapp_book_observations";
 	RepoAobj.repoB_name = "frontend_backend_message_passing_central_repository_v1";
 	RepoAobj.input_text = document.getElementById("username").value+"|"+RepoAobj.repoA_name;
@@ -102,11 +102,10 @@ async function remove_username() {
 	var RepoAobj = {};
   
 	RepoAobj.repoOwner = "CodeSolutions2";
-	RepoAobj.filename = "cb.txt";
+	RepoAobj.filename = "file_database.txt";
 	RepoAobj.repoA_name = "webapp_book_observations";
 	RepoAobj.repoB_name = "frontend_backend_message_passing_central_repository_v1";
-	RepoAobj.call_type = "insert_username";  // File database functions: insert_username, comparator_username_search
-	RepoAobj.input_text = document.getElementById("username").value+"|"+RepoAobj.call_type;
+	RepoAobj.input_text = document.getElementById("username").value+"|"+RepoAobj.repoA_name;
 	RepoAobj.foldername = "webappb";
   
 	// const obj = await delete_username_from_file_database(RepoAobj);
