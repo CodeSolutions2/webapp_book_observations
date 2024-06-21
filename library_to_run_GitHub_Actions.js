@@ -79,7 +79,7 @@ async function run_backend(obj) {
 					// console.log("obj.status:", obj.status);
 					
 					if ((/^20/g).test(obj.status) == true) {
-						console.log("Match found");
+						// console.log("Match found");
 						delete obj.auth; // the variable is deleted to force it to stop the loop as quickly as possible, it will then throw an error for the while loop thus the while loop is called in a try catch to prevent errors.
 					} else {
 						obj.auth = obj.env_text; // reinitialize value to keep the value obj.auth non-visible
@@ -181,15 +181,6 @@ export async function PUT_create_a_file_RESTAPI(auth, message, content, desired_
 
 
 export async function PUT_add_to_a_file_RESTAPI(auth, message, content, desired_path, sha, repoName, repoOwner) {
-
-	console.log('Updated the file');
-
-	console.log('message: ', message);
-	console.log('content: ', content);
-	console.log('desired_path: ', desired_path);
-	console.log('sha: ', sha);
-	console.log('repoName: ', repoName);
-	console.log('repoOwner: ', repoOwner);
 	
 	// PUT content into an existing file
 	let url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${desired_path}`;
