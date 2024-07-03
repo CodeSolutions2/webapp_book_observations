@@ -162,6 +162,30 @@ export class encrypted_CRUD_file_database {
 	}
 
 	// ------------------------------------------------
+	
+	async return_file_database() {
+
+		var obj = await this.initialize();
+
+		// ------------------------------------------------
+		
+		// Step 0: convert the JSON Web key (Key_jwk_obj) to an object (Key_obj)
+		obj = await this.GET_public_private_keys(obj);
+		
+		// ------------------------------------------------
+	
+		// Step 1: decrypt the file_database
+		obj = await this.decrypt_file_database(obj);
+	
+		// ------------------------------------------------
+	
+		// Step 2: View the contents of the file_database
+		console.log('****** Step 2: Return the contents of the file_database ******');
+		obj.query_view_result = "Finished: obj.decrypted_file_database outputted";
+		return obj;
+	}
+
+	// ------------------------------------------------
 
 	async delete_username_from_file_database() {
 	
